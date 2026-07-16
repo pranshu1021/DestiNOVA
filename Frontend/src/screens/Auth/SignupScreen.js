@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 
-
+import api from "../../services/api"
 
 import {
     View, 
@@ -25,7 +25,7 @@ export default function SignupScreen(){
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
  const navigation = useNavigation();
-    const handleSignup = () => {
+    const handleSignup = async () => {
         if ( !fullName || !email || !phone || !password || !confirmPassword){
 
              Alert.alert("fill the form correctly.");
@@ -34,8 +34,41 @@ export default function SignupScreen(){
         if ( password !== confirmPassword){
             Alert.alert("Error, Password does not match.")
         }
-        Alert.alert("Success, data sent over to our database. (signed-in")
-    
+        Alert.alert("Success, data sent over to our database. (signed-in");
+        
+        try{
+            const response = await api.post("/signup",{
+                fullName,
+                email,
+                phone,
+                password,
+            });
+
+            Alert.alert("Success", response.data.message)
+
+            // clear karenge idhar form ko
+            setFullName("");
+            setEmail("");
+            setPhone("");
+            setPassword("");
+            setConfirmPassword("");
+
+        }
+        catch(error){
+            if(error.response){
+                Alert.alert(
+                    "Signup Failed",
+                    error.response.data.message
+                );
+            }
+
+            else{
+                Alert.alert(
+                    "Network Error",
+                    "Could not connect to backend"
+                );
+            }
+        }
         
     }
     
