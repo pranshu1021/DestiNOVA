@@ -1,4 +1,7 @@
 import React, {useState} from "react";
+
+
+
 import {
     View, 
     Pressable,
@@ -32,6 +35,8 @@ export default function SignupScreen(){
             Alert.alert("Error, Password does not match.")
         }
         Alert.alert("Success, data sent over to our database. (signed-in")
+    
+        
     }
     
     
