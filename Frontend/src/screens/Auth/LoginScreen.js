@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-
+import api from "../../services/api"
 export default function LoginScreen(){
     const navigation = useNavigation();
 // states idhar rahengi
@@ -19,7 +19,7 @@ export default function LoginScreen(){
     const [showPassword, setShowPassword] = useState(false);
 
  
-    const handleLogin = ()=>{
+    const handleLogin = async()=>{
         if(!email || !password){
             Alert.alert(
                 "Error",
@@ -27,10 +27,29 @@ export default function LoginScreen(){
             );
             return;
         }
-        Alert.alert(
-            "Success",
-            "Login button pressed.\nbackend will now start processing your request."
-        );
+        try{
+            const response=await api.post("/login",{email,password})
+            Alert.alert(
+                "Success",
+                response.data.message
+            )
+            console.log(response.data.user)
+            console.log(response.data.token)
+        }
+        catch(error){
+            if (error.response){
+                Alert.alert(
+                    "Login Failed.",
+                 error.response.data.message
+                )
+            }
+            else{
+                Alert.alert(
+                    "Network Error.",
+                    "Could not connect to network.."
+                )
+            }
+        }
     }
 
     return(

@@ -1,6 +1,7 @@
 const User = require("../models/User"); //import user model
 
 const bcrypt = require("bcryptjs")// import bcrypt
+const jwt=require("jsonwebtoken")
 
 
 const signup = async(req,res) =>{
@@ -52,6 +53,13 @@ const signup = async(req,res) =>{
 };
 
 const login=async(req,res)=>{
+    const token=jwt.sign(
+        {
+            id:user._id
+        },
+        process.env.JWT_SECRET,
+        {expiresIn:"7d"}
+    )
     try{
         const {email,password}=req.body;
         // validation 
@@ -81,10 +89,29 @@ const login=async(req,res)=>{
            message: "Incorrect email/password", 
         })
       }
-    }
+     const user= await User.findOne({email});
+      res.status(200).json({
+        sucess:true,
+        message:"Login Successfully",
+        token,
+        user:{
+            id:user._id,
+            fullName:user.fullName,
+            email:user.email,
+            phone:user.phone,
 
+        }
+      })
+    }
+catch(error){
+    console.log(error);
+    res.status(500).json({
+        sucess:false,
+        message:"Internal server error"
+    })
+}
 }
 
 module.exports = {
-    signup
+    signup,login
 };
