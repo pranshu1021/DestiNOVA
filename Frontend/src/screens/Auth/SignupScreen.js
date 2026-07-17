@@ -111,7 +111,7 @@ export default function SignupScreen(){
                 Already have an account?
                 </Text> 
                 <TouchableOpacity onPress={()=> {console.log("Login button is pressed")
-                    navigation.navigate("Home")
+                    navigation.navigate("Login")
                     }}>
                     <Text style={styles.loginText}>Login</Text>
                 </TouchableOpacity>

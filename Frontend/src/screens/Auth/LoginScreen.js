@@ -53,27 +53,28 @@ export default function LoginScreen(){
     }
 
     return(
-        <SafeAreaView>
-            <ScrollView>
+        <SafeAreaView style={styles.loginContainer}>
+            <ScrollView contentContainerStyle={styles.scroll}
+               showsVerticalScrollIndicator={false}>
 
-            <View>
-                <Text>
+            <View >
+                <Text style={styles.loginTitle}>
                     👾
                 </Text>
 
-                <Text> DestiNOVA</Text>
+                <Text style={styles.loginSubtitle}> DestiNOVA</Text>
             </View>
-            <Text>Continue your spiritual journey with us.</Text>
+            <Text style={styles.LoginContent}>Continue your spiritual journey with us.</Text>
 
-            <TextInput
+            <TextInput style={styles.loginInput}
              placeholder="Enter your Email"
              keyboardType="email-address"
              autoCapitalize="none"
              value={email}
              onChangeText = {setEmail}
             />
-            <View>
-            <TextInput
+            <View style={styles.passwordContainer}>
+            <TextInput style={styles.loginPassword}
             placeholder="Enter your Password"
             secureTextEntry={!showPassword}
             value={password}
@@ -81,7 +82,7 @@ export default function LoginScreen(){
             />
 
             <TouchableOpacity onPress={()=>setShowPassword(!showPassword)}>
-                <Text>
+                <Text style={styles.showPasswordIcon}>
                     {showPassword ? "🙈" : "🙉"}
                 </Text>
             </TouchableOpacity>
@@ -90,15 +91,15 @@ export default function LoginScreen(){
             {/* forgot password */}
 
         <TouchableOpacity>
-            <Text>Forgot Password?</Text>
+            <Text style={styles.loginText}>Forgot Password?</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleLogin}>
-            <Text>Login</Text>
+            <Text style={styles.loginButton}>Login</Text>
         </TouchableOpacity>
 
-        <View>
-            <Text>Don't have an account?</Text>
+        <View style={styles.loginAlreadyAccount}>
+            <Text style={styles.loginText}>Don't have an account?</Text>
             <TouchableOpacity onPress={()=> navigation.navigate("Signup")}>
                 <Text>
                     Sign Up
@@ -109,3 +110,104 @@ export default function LoginScreen(){
         </SafeAreaView>
     )
 }
+
+const styles=StyleSheet.create({
+   loginContainer:{
+    flex:1,
+    backgroundColor:"#dbe2f5"
+   },
+
+   scroll:{
+    flexGrow:1,
+    justifyContent:"center",
+    padding:24,
+   },
+
+   loginTitle:{
+    fontSize:32,
+    fontWeight:"700",
+    textAlign:"center",
+    color:"indigo",
+    marginBottom:10,
+   },
+
+   loginSubtitle:{
+    textAlign:"center",
+    color:"slategray",
+    marginBottom:35,
+    fontSize:20,
+    fontWeight:"bold",
+    lineHeight:22,
+   },
+
+   LoginContent:{
+   fontSize:20,
+   textAlign:"center",
+   },
+
+    loginInput: {
+        marginTop:10,
+        backgroundColor: "white",
+        borderWidth: 1,
+        borderColor: "lavender",
+        borderRadius: 12,
+        padding: 15, 
+        marginBottom: 18, 
+        fontSize: 16, 
+        color : "midnightblue",
+    },
+
+    loginPassword: {
+        flex:1,
+        position:"fixed",
+        backgroundColor: "white",
+        borderWidth: 1,
+        borderColor: "lavender",
+        borderRadius: 12,
+        padding: 15, 
+        marginBottom: 18, 
+        fontSize: 16, 
+        color : "midnightblue",
+    },
+
+      loginButton:{
+        backgroundColor: "blueviolet",
+        padding:16,
+        borderRadius:12, 
+        color:"white",
+         textAlign:"center",
+         fontSize:18,
+        alignItems: "center",
+        marginTop : 10, 
+        elevation: 4,
+       
+       
+
+    },
+
+      loginText: {
+        color: "blue",
+        fontWeight: "600",
+        fontSize: 17,
+        textAlign:"center",
+        
+    },
+
+    loginAlreadyAccount:{
+        marginTop:10,
+        flexDirection:"row",
+        justifyContent:"space-between",
+    },
+  
+   showPasswordIcon:{
+    fontSize:30,
+    textAlign:"right",
+     marginLeft:10,
+   },
+
+   passwordContainer:{
+   flexDirection:"row",
+   alignItems:"center",
+   },
+
+})
