@@ -12,11 +12,15 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 
 //MIDDLEWARE
-
 app.use(cors());   // allow karega frontend ko backend access krne mei
-app.use("/api/auth",authRoutes);
+
 app.use(express.json()); //allow karega express ko to understand JSON data
 app.use(express.urlencoded({extended:true}))
+
+
+app.use("/api/auth",authRoutes);
+
+
 
 app.get("/", (req,res)=>{
     res.json({
