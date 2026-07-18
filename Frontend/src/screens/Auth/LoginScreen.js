@@ -56,7 +56,7 @@ export default function LoginScreen(){
         <SafeAreaView style={styles.loginContainer}>
             <ScrollView contentContainerStyle={styles.scroll}
                showsVerticalScrollIndicator={false}>
-
+<View style={styles.card}>
             <View >
                 <Text style={styles.loginTitle}>
                     👾
@@ -65,7 +65,7 @@ export default function LoginScreen(){
                 <Text style={styles.loginSubtitle}> DestiNOVA</Text>
             </View>
             <Text style={styles.LoginContent}>Continue your spiritual journey with us.</Text>
-
+            <Text style={styles.label}>Email</Text>
             <TextInput style={styles.loginInput}
              placeholder="Enter your Email"
              keyboardType="email-address"
@@ -73,7 +73,9 @@ export default function LoginScreen(){
              value={email}
              onChangeText = {setEmail}
             />
+<Text style={styles.label}>Password</Text>
             <View style={styles.passwordContainer}>
+
             <TextInput style={styles.loginPassword}
             placeholder="Enter your Password"
             secureTextEntry={!showPassword}
@@ -90,124 +92,182 @@ export default function LoginScreen(){
 
             {/* forgot password */}
 
-        <TouchableOpacity>
+        <TouchableOpacity style={{alignSelf:"flex-end"}}>
             <Text style={styles.loginText}>Forgot Password?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={handleLogin}>
+        <TouchableOpacity activeOpacity={0.8} onPress={handleLogin}>
             <Text style={styles.loginButton}>Login</Text>
         </TouchableOpacity>
 
         <View style={styles.loginAlreadyAccount}>
             <Text style={styles.loginText}>Don't have an account?</Text>
             <TouchableOpacity onPress={()=> navigation.navigate("Signup")}>
-                <Text>
+                <Text style={styles.signupText}>
                     Sign Up
                 </Text>
             </TouchableOpacity>
+        </View>
         </View>
             </ScrollView>
         </SafeAreaView>
     )
 }
 
-const styles=StyleSheet.create({
-   loginContainer:{
-    flex:1,
-    backgroundColor:"#dbe2f5"
-   },
+const styles = StyleSheet.create({
+    label: {
+  marginBottom: 8,
+  marginLeft: 5,
+  color: "#374151",
+  fontWeight: "600",
+},
+  loginContainer: {
+    flex: 1,
+    backgroundColor: "#EEF2FF",
+  },
 
-   scroll:{
-    flexGrow:1,
-    justifyContent:"center",
-    padding:24,
-   },
+  scroll: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: 25,
+    paddingVertical: 40,
+  },
 
-   loginTitle:{
-    fontSize:32,
+  loginTitle: {
+    fontSize: 70,
+    textAlign: "center",
+    marginBottom: 10,
+  },
+
+  loginSubtitle: {
+    fontSize: 34,
+    fontWeight: "800",
+    textAlign: "center",
+    color: "#4F46E5",
+    letterSpacing: 1,
+  },
+
+  LoginContent: {
+    textAlign: "center",
+    color: "#6B7280",
+    fontSize: 17,
+    marginTop: 12,
+    marginBottom: 35,
+    lineHeight: 24,
+  },
+
+  loginInput: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: "#111827",
+
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+
+    marginBottom: 18,
+
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+  },
+
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+
+    paddingHorizontal: 15,
+
+    marginBottom: 18,
+
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+  },
+
+  loginPassword: {
+    flex: 1,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: "#111827",
+  },
+
+  showPasswordIcon: {
+    fontSize: 24,
+    marginLeft: 10,
+  },
+
+  loginText: {
+    color: "#4F46E5",
+    fontWeight: "600",
+    fontSize: 15,
+    textAlign: "center",
+  },
+
+  loginButton: {
+    backgroundColor: "#4F46E5",
+    paddingVertical: 17,
+    borderRadius: 18,
+    marginTop: 18,
+
+    textAlign: "center",
+    color: "white",
+
+    fontSize: 18,
+    fontWeight: "700",
+
+    elevation: 5,
+    shadowColor: "#4F46E5",
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+  },
+
+  loginAlreadyAccount: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 28,
+  },
+  card: {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 25,
+  padding: 25,
+
+  elevation: 8,
+  shadowColor: "#000",
+  shadowOpacity: 0.1,
+  shadowRadius: 15,
+  shadowOffset: {
+    width: 0,
+    height: 6,
+  },
+},
+signupText:{
+    color:"#4F46E5",
     fontWeight:"700",
-    textAlign:"center",
-    color:"indigo",
-    marginBottom:10,
-   },
-
-   loginSubtitle:{
-    textAlign:"center",
-    color:"slategray",
-    marginBottom:35,
-    fontSize:20,
-    fontWeight:"bold",
-    lineHeight:22,
-   },
-
-   LoginContent:{
-   fontSize:20,
-   textAlign:"center",
-   },
-
-    loginInput: {
-        marginTop:10,
-        backgroundColor: "white",
-        borderWidth: 1,
-        borderColor: "lavender",
-        borderRadius: 12,
-        padding: 15, 
-        marginBottom: 18, 
-        fontSize: 16, 
-        color : "midnightblue",
-    },
-
-    loginPassword: {
-        flex:1,
-        position:"fixed",
-        backgroundColor: "white",
-        borderWidth: 1,
-        borderColor: "lavender",
-        borderRadius: 12,
-        padding: 15, 
-        marginBottom: 18, 
-        fontSize: 16, 
-        color : "midnightblue",
-    },
-
-      loginButton:{
-        backgroundColor: "blueviolet",
-        padding:16,
-        borderRadius:12, 
-        color:"white",
-         textAlign:"center",
-         fontSize:18,
-        alignItems: "center",
-        marginTop : 10, 
-        elevation: 4,
-       
-       
-
-    },
-
-      loginText: {
-        color: "blue",
-        fontWeight: "600",
-        fontSize: 17,
-        textAlign:"center",
-        
-    },
-
-    loginAlreadyAccount:{
-        marginTop:10,
-        flexDirection:"row",
-        justifyContent:"space-between",
-    },
-  
-   showPasswordIcon:{
-    fontSize:30,
-    textAlign:"right",
-     marginLeft:10,
-   },
-
-   passwordContainer:{
-   flexDirection:"row",
-   alignItems:"center",
-   },
-
-})
+    marginLeft:5,
+    fontSize:16,
+}
+});
