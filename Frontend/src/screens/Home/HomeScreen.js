@@ -1,3 +1,5 @@
+import {React,use,useContext}from "react";
+import {AuthContext} from "../../context/AuthContext"
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet,
    Text,
@@ -12,8 +14,7 @@ import { StyleSheet,
 
 
 export default function HomeScreen() {
-
-
+  const {user, logout} = useContext(AuthContext);
   return (
     <SafeAreaView style={styles.container}>
    
@@ -21,8 +22,8 @@ export default function HomeScreen() {
 
     
     <View style={styles.header}>
-        <Text style={styles.greeting}>Good Morning</Text>
-        <Text style= {styles.name}>Pranshu</Text>
+        <Text style={styles.greeting}>Welcome</Text>
+        <Text style= {styles.name}>Good Morning {user?.fullName}</Text>
     </View>
     <Pressable style = {styles.Notification}>
       <Text style={styles.icon}>🔔</Text>

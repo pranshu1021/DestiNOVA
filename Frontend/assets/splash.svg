@@ -1,0 +1,72 @@
+<svg width="685" height="697" viewBox="0 0 685 697" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bgGlow" gradientUnits="userSpaceOnUse" cx="350" cy="347" r="480">
+      <stop offset="0%" stop-color="#3a1466"/>
+      <stop offset="35%" stop-color="#240046"/>
+      <stop offset="70%" stop-color="#170030"/>
+      <stop offset="100%" stop-color="#0a0018"/>
+    </radialGradient>
+
+    <radialGradient id="planetGlow" gradientUnits="userSpaceOnUse" cx="326" cy="300" r="240">
+      <stop offset="0%"  stop-color="#E0AAFF"/>
+      <stop offset="24%" stop-color="#C78DFF"/>
+      <stop offset="48%" stop-color="#9A5FDB"/>
+      <stop offset="68%" stop-color="#7B2CBF"/>
+      <stop offset="86%" stop-color="#3E1170"/>
+      <stop offset="100%" stop-color="#240046"/>
+    </radialGradient>
+
+    <linearGradient id="ringGrad" gradientUnits="userSpaceOnUse" x1="109.0" y1="420.7" x2="591.0" y2="273.3">
+      <stop offset="0%"  stop-color="#7B2CBF" stop-opacity="0.4"/>
+      <stop offset="45%" stop-color="#9A6ED0" stop-opacity="0.75"/>
+      <stop offset="80%" stop-color="#C78DFF" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#E0AAFF" stop-opacity="1"/>
+    </linearGradient>
+
+    <radialGradient id="mergeGlow" gradientUnits="userSpaceOnUse" cx="591.0" cy="273.3" r="90">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="35%" stop-color="#E0AAFF" stop-opacity="0.55"/>
+      <stop offset="70%" stop-color="#C78DFF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#C78DFF" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="softBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="685" height="697" fill="#0a0018"/>
+  <rect x="0" y="0" width="685" height="697" fill="url(#bgGlow)"/>
+
+  <g opacity="0.55" fill="#E0AAFF">
+    <circle cx="139" cy="146" r="2"/>
+    <circle cx="565" cy="178" r="1.6"/>
+    <circle cx="620" cy="345" r="1.8"/>
+    <circle cx="112" cy="589" r="2.2"/>
+    <circle cx="330" cy="655" r="1.8"/>
+    <circle cx="474" cy="600" r="1.4"/>
+    <circle cx="90" cy="330" r="1.4"/>
+    <circle cx="650" cy="120" r="1.6"/>
+    <circle cx="230" cy="120" r="1.3"/>
+    <circle cx="480" cy="80" r="1.4"/>
+  </g>
+
+  <path d="M591.0,273.3 A252,70,-17,0,1,109.0,420.7 A252,70,-17,0,1,591.0,273.3"
+        fill="none" stroke="url(#ringGrad)" stroke-width="16" stroke-linecap="round"/>
+
+  <circle cx="350" cy="347" r="142" fill="url(#planetGlow)"/>
+
+  <path d="M568.9,316.7 A252,70,-17,0,1,151.5,444.3"
+        fill="none" stroke="url(#ringGrad)" stroke-width="16" stroke-linecap="round"/>
+
+  <circle cx="591.0" cy="273.3" r="80" fill="url(#mergeGlow)" filter="url(#softBlur)"/>
+
+  <g transform="translate(531.0,213.3)" fill="#C78DFF">
+    <path d="M60,4
+             C 63,44 76,57 118,60
+             C 76,63 63,76 60,118
+             C 57,76 44,63 3,60
+             C 44,57 57,44 60,4
+             Z"/>
+  </g>
+</svg>

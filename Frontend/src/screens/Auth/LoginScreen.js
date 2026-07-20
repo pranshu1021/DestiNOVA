@@ -11,12 +11,19 @@ import {
 import {SafeAreaView} from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import api from "../../services/api"
+import {useContext} from "react";
+import {AuthContext} from "../../context/AuthContext"
+
+import AsyncStorage from "@react-native-async-storage/async-storage"
+
+
 export default function LoginScreen(){
     const navigation = useNavigation();
 // states idhar rahengi
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const {login} = useContext(AuthContext);
 
  
     const handleLogin = async()=>{
@@ -28,13 +35,35 @@ export default function LoginScreen(){
             return;
         }
         try{
-            const response=await api.post("/login",{email,password})
-            Alert.alert(
-                "Success",
-                response.data.message
+            const response=await api.post("/login",{
+              email,
+              password
+            })
+            
+            await login(
+              response.data.token,
+              response.data.user
             )
-            console.log(response.data.user)
-            console.log(response.data.token)
+            Alert.alert(
+              "Success",
+              "Login Successful"
+            );
+            const user = await AsyncStorage.getItem("user");
+           
+           
+           if(user){
+            const parsedUser = JSON.parse(user);
+            console.log(parsedUser.fullName);
+           }
+
+            const token = await AsyncStorage.getItem("token");
+            console.log("Saved token");
+            console.log(token);
+            
+            navigation.replace("Home");
+
+            // await AsyncStorage.clear();
+
         }
         catch(error){
             if (error.response){
