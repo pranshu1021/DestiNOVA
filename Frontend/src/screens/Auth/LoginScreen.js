@@ -6,17 +6,24 @@ import {
     TouchableOpacity,
     ScrollView,
     StyleSheet,
-    Alert
+    Alert,
+    Image
 } from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import api from "../../services/api"
 import {useContext} from "react";
 import {AuthContext} from "../../context/AuthContext"
-
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import {useEffect} from "react";
+import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "../../config/googleAuth"; //google client ID
+import * as Google from "expo-auth-session/providers/google"; // this is for auth...
+import * as WebBrowser from "expo-web-browser"; //browser ko automatically close karte h iski help se
 
 
+// iska use browser ko close krne ke liye 
+// aur sirf ek baar app load hone par chalega
+WebBrowser.maybeCompleteAuthSession();
 export default function LoginScreen(){
     const navigation = useNavigation();
 // states idhar rahengi
@@ -24,7 +31,10 @@ export default function LoginScreen(){
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const {login} = useContext(AuthContext);
-
+    const [request, response, promptAsync] = Google.useAuthRequest({
+      androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+      webClientId: GOOGLE_WEB_CLIENT_ID
+    })
  
     const handleLogin = async()=>{
         if(!email || !password){
@@ -80,6 +90,40 @@ export default function LoginScreen(){
             }
         }
     }
+
+       const handleGoogleLogin= async() =>{
+        try{
+
+          if(!request){
+            Alert.alert("Please wait","Google Sign-In is initializing...")
+            return;
+          }
+
+          ///google account picker open karega
+          await promptAsync();
+
+        }
+        catch(error){
+          console.log("Google Login Error", error)
+        }
+    }
+    useEffect(()=>{
+      if(!response) return;
+      console.log("Google Response:",response);
+
+            if(response.type ==="success"){
+              console.log("Google Login Successful");
+
+              console.log("Authentication:" , response.authentication)
+            }
+            else if(response.type ==="cancel"){
+              console.log("User cancelled login.");
+            }
+            else{
+              console.log("Google Login Failed.");
+            }
+            console.log("Google Response:",response);
+          },[response])
 
     return(
         <SafeAreaView style={styles.loginContainer}>
@@ -137,9 +181,60 @@ export default function LoginScreen(){
                 </Text>
             </TouchableOpacity>
         </View>
+
+
+
+          <View style={{flexDirection:"row"
+            ,alignItems:"center",
+            marginVertical:20
+          }}>
+            <View
+              style={{flex:1,
+                height:1,
+                backgroundColor:"black",
+              }}
+              />
+                
+              <Text>
+                OR
+              </Text>
+
+              <View style={{flex:1,
+                height:1,
+                backgroundColor:"black"
+              }} />
+              
+          </View>
+          <TouchableOpacity onPress={handleGoogleLogin} style={{
+            backgroundColor:"white",
+           
+            elevation:5,
+            paddingVertical:14,
+            borderRadius:10,
+            flexDirection:"row",
+            justifyContent:"center",
+            alignItems:"center",
+          }}>
+              <Image
+        style={{
+          width:24,
+          height:24,
+          marginRight:10,
+        }}
+        source={{
+          uri:'https://yt3.googleusercontent.com/yqq5boPOuTo3s85oxX-DJjIhkeVN187TIEvYpCekcvuPMA9HepfOQpbWUN5w6Sn8gxlBZzPG=s900-c-k-c0x00ffffff-no-rj'
+        }}
+      />
+
+            <Text>
+              Continue with Google
+            </Text>
+          </TouchableOpacity>
+          
         </View>
             </ScrollView>
         </SafeAreaView>
+        
     )
 }
 
