@@ -17,13 +17,13 @@ import {AuthContext} from "../../context/AuthContext"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import {useEffect} from "react";
 import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "../../config/googleAuth"; //google client ID
-import * as Google from "expo-auth-session/providers/google"; // this is for auth...
-import * as WebBrowser from "expo-web-browser"; //browser ko automatically close karte h iski help se
-
+// import * as Google from "expo-auth-session/providers/google"; // this is for auth...
+// import * as WebBrowser from "expo-web-browser"; //browser ko automatically close karte h iski help se
+import { GoogleSignin,statusCodes } from "@react-native-google-signin/google-signin";
 
 // iska use browser ko close krne ke liye 
 // aur sirf ek baar app load hone par chalega
-WebBrowser.maybeCompleteAuthSession();
+// WebBrowser.maybeCompleteAuthSession();
 export default function LoginScreen(){
     const navigation = useNavigation();
 // states idhar rahengi
@@ -31,10 +31,10 @@ export default function LoginScreen(){
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const {login} = useContext(AuthContext);
-    const [request, response, promptAsync] = Google.useAuthRequest({
-      androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-      webClientId: GOOGLE_WEB_CLIENT_ID
-    })
+    // const [request, response, promptAsync] = Google.useAuthRequest({
+    //   androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+    //   webClientId: GOOGLE_WEB_CLIENT_ID
+    // })
  
     const handleLogin = async()=>{
         if(!email || !password){
@@ -92,39 +92,67 @@ export default function LoginScreen(){
     }
 
        const handleGoogleLogin= async() =>{
-        try{
+        // try{
 
-          if(!request){
-            Alert.alert("Please wait","Google Sign-In is initializing...")
-            return;
-          }
+        //   await GoogleSignin.signOut(); //pehle se mehak signed in h toh signout  krra hu
+        //   await GoogleSignin.hasPlayServices(); //checking google play services check
 
-          ///google account picker open karega
-          await promptAsync();
+        //   const userInfo = await GoogleSignin.signIn();// google acc picker h yeh 
+        //   console.log("Google User:", userInfo);
+        // }
+        // catch(error){
+        //   if(error.code === statusCodes.SIGN_IN_CANCELLED){
+        //     console.log("User cancelled Login");
 
-        }
-        catch(error){
-          console.log("Google Login Error", error)
-        }
+        //   }
+        //   else if( error.code ===statusCodes.IN_PROGRESS){
+        //     console.log("Sign in already in progress")
+        //   }
+        //   else if(error.code===statusCodes.PLAY_SERVICES_NOT_AVAILABLE){
+        //     Alert.alert("Google Play Services", "Please update Google Play Services.");
+            
+        //   }else{
+        //     console.log("Google Login Error:", error)
+        //   }
+        // }
+        try {
+    await GoogleSignin.hasPlayServices();
+
+    const userInfo = await GoogleSignin.signIn();
+
+    console.log("========== GOOGLE LOGIN ==========");
+    console.log(userInfo);
+    console.log("=================================");
+
+    Alert.alert("Success", "Google Login Success");
+
+  } catch (error) {
+    console.log("Google Error:", JSON.stringify(error, null, 2));
+    Alert.alert("Error", JSON.stringify(error));
+  }
     }
-    useEffect(()=>{
-      if(!response) return;
-      console.log("Google Response:",response);
+    // useEffect(()=>{
+    //   if(!response) return;
+    //   console.log("Google Response:",response);
 
-            if(response.type ==="success"){
-              console.log("Google Login Successful");
+    //         if(response.type ==="success"){
+    //           console.log("Google Login Successful");
 
-              console.log("Authentication:" , response.authentication)
-            }
-            else if(response.type ==="cancel"){
-              console.log("User cancelled login.");
-            }
-            else{
-              console.log("Google Login Failed.");
-            }
-            console.log("Google Response:",response);
-          },[response])
-
+    //           console.log("Authentication:" , response.authentication)
+    //         }
+    //         else if(response.type ==="cancel"){
+    //           console.log("User cancelled login.");
+    //         }
+    //         else{
+    //           console.log("Google Login Failed.");
+    //         }
+    //         console.log("Google Response:",response);
+    //       },[response])
+        useEffect(()=>{
+          GoogleSignin.configure({
+            webClientId: GOOGLE_WEB_CLIENT_ID,
+          },[])
+        })
     return(
         <SafeAreaView style={styles.loginContainer}>
             <ScrollView contentContainerStyle={styles.scroll}
