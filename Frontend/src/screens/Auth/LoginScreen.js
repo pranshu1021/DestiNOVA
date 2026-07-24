@@ -36,6 +36,9 @@ export default function LoginScreen(){
     //   webClientId: GOOGLE_WEB_CLIENT_ID
     // })
  
+
+ 
+
     const handleLogin = async()=>{
         if(!email || !password){
             Alert.alert(
@@ -70,7 +73,7 @@ export default function LoginScreen(){
             console.log("Saved token");
             console.log(token);
             
-            navigation.replace("Home");
+            
 
             // await AsyncStorage.clear();
 
@@ -120,6 +123,15 @@ export default function LoginScreen(){
 
     const userInfo = await GoogleSignin.signIn();
 
+       const response = await api.post("/google",{
+      idToken: userInfo.data.idToken
+    });
+
+    await login(
+      response.data.token,
+      response.data.user
+    );
+    
     console.log("========== GOOGLE LOGIN ==========");
     console.log(userInfo);
     console.log("=================================");

@@ -1,6 +1,9 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs"); 
 const jwt = require("jsonwebtoken"); 
+const {OAuth2Client} = require("google-auth-library");
+
+const client = new OAuth2Client(process.env.GOOGLE_WEB_CLIENT_ID)
 
 
 const signup = async (req, res) => {
@@ -138,6 +141,80 @@ const login = async (req, res) => {
     }
 };
 
+const googleLogin = async(req,res) =>{
+
+    try{
+            const {idToken} = req.body; // frontend se google id token receive karenge
+
+            if(!idToken){
+                return res.status(400).json({
+                    success:false,
+                    message:"Google ID Token is required."
+                });
+            }
+            //verifyIdToken
+            const ticket = await client.verifyIdToken({
+                idToken,
+                audience: process.env.GOOGLE_WEB_CLIENT_ID,
+            })
+              // to get user data google se =>>   getPayload 
+            const payload = ticket.getPayload()
+            // Google user ID
+            const  { sub, name, email, picture} = payload
+            let user  = await User.findOne({email}); //  already user hai toh usko save krdo user ke andar
+
+
+            //nnahi hai toh naya user create kar rhe hai
+            if(!user){
+                user = new User({
+                    fullName:name,
+                    email,
+                    phone:"",
+                    password:"",
+                    provider:"google",
+                    googleId: sub,
+                    photo: picture
+                });
+                await user.save();
+            }
+
+                // jwt token create 
+
+                // token kiske liye bna rhe hai, sercret, expiry date
+                const token = jwt.sign(
+                    {
+                        id: user._id
+                    },
+                    process.env.JWT_SECRET,
+                    {
+                        expiresIn:"7d"
+                    }
+                );
+
+                return res.status(200).json({
+                    success:true,
+                    message: "Google Login Successful.",
+                    token,
+                    user:{
+                        id: user._id,
+                        fullName: user.fullName,
+                        email: user.email,
+                        phone: user.phone,
+                        photo: user.photo
+                    }
+                })
+
+
+    }
+    catch(error){
+        console.log(error)
+        return res.status(500).json({
+            success:false,
+            message:"Google Login Failed."
+        })
+    }
+}
+
 const getProfile = async(req, res)=>{
     try{
         const user = await User.findById(req.user.id).select("-password");
@@ -154,10 +231,11 @@ const getProfile = async(req, res)=>{
     }
 }
 
+
 module.exports = {
 
     signup,
-
+   googleLogin,
     login,
     getProfile
 

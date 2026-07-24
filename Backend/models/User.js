@@ -16,12 +16,26 @@ const userSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        required: true
+        default:"",
     },
     password: {
         type: String,
-        required: true
+        default:"",
+    },
+    provider:{
+        type: String,
+        enum: ["local","google"],
+        default: "local",
+    },
+    googleId:{
+        type: String,
+        default:"",
+    },
+    photo:{
+        type: String,
+        default:"",
     }
+
 },
     {
         timestamps: true // yeh time add kardeta hai jab new user add ho
