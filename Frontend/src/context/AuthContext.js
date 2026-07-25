@@ -5,6 +5,7 @@ import React, {
 } from "react";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 export const AuthContext = createContext();
 
@@ -55,10 +56,16 @@ const login = async(token, user) =>{
 // LOGOUT function niche
 
 const logout = async ()=>{
+    try{
+        await GoogleSignin.signOut();
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("user");
     setToken(null);
     setUser(null);
+    }
+    catch(error){
+        console.log("Logout Error:", error)
+    }
 }
 
 return (

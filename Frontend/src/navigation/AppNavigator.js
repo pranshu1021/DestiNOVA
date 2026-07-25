@@ -29,11 +29,11 @@ export default function AppNavigator(){
         <Stack.Navigator  screenOptions={{headerShown : false}}>
           
             {token ? (<>
-                  <Stack.Screen name="Preview" component={NamePage}/>
+                  {/* <Stack.Screen name="Preview" component={NamePage}/>
             <Stack.Screen name = "Gender" component={GenderPage}/>
             <Stack.Screen name = "Birth" component={BirthTimePage}/>
              <Stack.Screen name = "BirthDate" component={DateOfBirthPage}/>
-             <Stack.Screen name = "BirthPlace" component={PlaceOfBirthPage}/>
+             <Stack.Screen name = "BirthPlace" component={PlaceOfBirthPage}/> */}
                 <Stack.Screen name = "Home" component={HomeScreen}/>
             </>
             )

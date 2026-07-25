@@ -28,6 +28,9 @@ export default function HomeScreen() {
     <Pressable style = {styles.Notification}>
       <Text style={styles.icon}>🔔</Text>
     </Pressable>
+    <Pressable onPress={logout} style = {styles.Notification}>
+      <Text style={styles.icon}>Logout</Text>
+    </Pressable>
 
     <View style={styles.searchBar}>
       <Text style={styles.searchText}>Search Astrologers</Text>

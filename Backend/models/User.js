@@ -34,6 +34,39 @@ const userSchema = new mongoose.Schema({
     photo:{
         type: String,
         default:"",
+    },
+    // ASTROLOGY PROFILE KE data
+    gender:{
+        type: String,
+        enum:["Male","Female","Other",""],
+        default:"",
+    },
+
+    dateOfBirth:{
+        type: Date,
+        default:null,
+    }
+    ,
+    birthTime:{
+        type:String,
+        default:"",
+
+    }
+    ,birthPlace:{
+        type: String,
+        default:"",
+    },
+    birthLatitude:{
+        type: Number,
+        default: null,
+    },
+    birthLongitude: {
+        type: Number,
+        default:null,
+    }
+    ,profileCompleted:{
+        type: Boolean,
+        default: false,
     }
 
 },

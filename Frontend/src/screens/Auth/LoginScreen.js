@@ -31,11 +31,7 @@ export default function LoginScreen(){
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const {login} = useContext(AuthContext);
-    // const [request, response, promptAsync] = Google.useAuthRequest({
-    //   androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-    //   webClientId: GOOGLE_WEB_CLIENT_ID
-    // })
- 
+
 
  
 
@@ -75,7 +71,7 @@ export default function LoginScreen(){
             
             
 
-            // await AsyncStorage.clear();
+
 
         }
         catch(error){
@@ -95,29 +91,7 @@ export default function LoginScreen(){
     }
 
        const handleGoogleLogin= async() =>{
-        // try{
-
-        //   await GoogleSignin.signOut(); //pehle se mehak signed in h toh signout  krra hu
-        //   await GoogleSignin.hasPlayServices(); //checking google play services check
-
-        //   const userInfo = await GoogleSignin.signIn();// google acc picker h yeh 
-        //   console.log("Google User:", userInfo);
-        // }
-        // catch(error){
-        //   if(error.code === statusCodes.SIGN_IN_CANCELLED){
-        //     console.log("User cancelled Login");
-
-        //   }
-        //   else if( error.code ===statusCodes.IN_PROGRESS){
-        //     console.log("Sign in already in progress")
-        //   }
-        //   else if(error.code===statusCodes.PLAY_SERVICES_NOT_AVAILABLE){
-        //     Alert.alert("Google Play Services", "Please update Google Play Services.");
-            
-        //   }else{
-        //     console.log("Google Login Error:", error)
-        //   }
-        // }
+       
         try {
     await GoogleSignin.hasPlayServices();
 
@@ -140,31 +114,15 @@ export default function LoginScreen(){
 
   } catch (error) {
     console.log("Google Error:", JSON.stringify(error, null, 2));
-    Alert.alert("Error", JSON.stringify(error));
+    console.log("Google Error:", error);
   }
     }
-    // useEffect(()=>{
-    //   if(!response) return;
-    //   console.log("Google Response:",response);
-
-    //         if(response.type ==="success"){
-    //           console.log("Google Login Successful");
-
-    //           console.log("Authentication:" , response.authentication)
-    //         }
-    //         else if(response.type ==="cancel"){
-    //           console.log("User cancelled login.");
-    //         }
-    //         else{
-    //           console.log("Google Login Failed.");
-    //         }
-    //         console.log("Google Response:",response);
-    //       },[response])
+   
         useEffect(()=>{
           GoogleSignin.configure({
             webClientId: GOOGLE_WEB_CLIENT_ID,
-          },[])
-        })
+          })
+        },[])
     return(
         <SafeAreaView style={styles.loginContainer}>
             <ScrollView contentContainerStyle={styles.scroll}
