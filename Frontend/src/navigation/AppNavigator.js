@@ -13,9 +13,9 @@ import SignupScreen from "../screens/Auth/SignupScreen";
 import HomeScreen from "../screens/Home/HomeScreen";
 import NamePage from "../screens/Screenspages/NamePage";
 import GenderPage from "../screens/Screenspages/GenderPage";
-import BirthTimePage from "../screens/Screenspages/BIrthTimePage";
-import DateOfBirthPage from "../screens/Screenspages/DateOfBIrthPage";
-import PlaceOfBirthPage from "../screens/Screenspages/PlaceOFBIrthPage";
+import BirthTimePage from "../screens/Screenspages/BirthTimePage";
+import DateOfBirthPage from "../screens/Screenspages/DateofBirthPage";
+import PlaceOfBirthPage from "../screens/Screenspages/PlaceofBirthPage";
 
 const Stack = createNativeStackNavigator();
 
