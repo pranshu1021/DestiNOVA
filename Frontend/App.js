@@ -5,7 +5,8 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from "./src/navigation/AppNavigator.js";
 import AuthProvider from './src/context/AuthContext.js';
-
+import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "./src/config/googleAuth.js"; //google client ID
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 SplashScreen.preventAutoHideAsync().catch(() => {});
 export default function App() {
 useEffect(() => {
@@ -33,6 +34,11 @@ useEffect(() => {
     prepare();
 
   }, []);
+   useEffect(()=>{
+            GoogleSignin.configure({
+              webClientId: GOOGLE_WEB_CLIENT_ID,
+            })
+          },[])
   return (
 
 

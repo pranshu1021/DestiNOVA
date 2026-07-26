@@ -55,17 +55,25 @@ const login = async(token, user) =>{
 
 // LOGOUT function niche
 
-const logout = async ()=>{
+const logout = async()=>{
     try{
+    const provider = await AsyncStorage.getItem("provider");
+    if(provider === "google"){
         await GoogleSignin.signOut();
-    await AsyncStorage.removeItem("token");
-    await AsyncStorage.removeItem("user");
+    }
+
+    await AsyncStorage.multiRemove([
+        "token",
+        "user",
+        "provider",
+    ])
     setToken(null);
     setUser(null);
     }
     catch(error){
         console.log("Logout Error:", error)
     }
+
 }
 
 return (

@@ -49,6 +49,8 @@ export default function LoginScreen(){
               password
             })
             
+            await AsyncStorage.setItem("provider","email");
+
             await login(
               response.data.token,
               response.data.user
@@ -93,36 +95,50 @@ export default function LoginScreen(){
        const handleGoogleLogin= async() =>{
        
         try {
+           console.log("Step 1");
+
     await GoogleSignin.hasPlayServices();
+
+    console.log("Step 2");
 
     const userInfo = await GoogleSignin.signIn();
 
-       const response = await api.post("/google",{
-      idToken: userInfo.data.idToken
+    console.log("Google Success");
+    console.log(userInfo);
+
+    console.log("Step 3");
+
+    const response = await api.post("/google", {
+      idToken: userInfo.data.idToken,
     });
+
+    console.log("Backend Response");
+    console.log(response.data);
+
+    console.log("Step 4");
+
+    await AsyncStorage.setItem("provider", "google");
 
     await login(
       response.data.token,
       response.data.user
     );
-    
-    console.log("========== GOOGLE LOGIN ==========");
-    console.log(userInfo);
-    console.log("=================================");
+
+    console.log("Step 5");
 
     Alert.alert("Success", "Google Login Success");
 
   } catch (error) {
-    console.log("Google Error:", JSON.stringify(error, null, 2));
-    console.log("Google Error:", error);
+    console.log("FULL ERROR");
+    console.log(error);
+
+    if (error.response) {
+      console.log(error.response.data);
+    }
   }
     }
    
-        useEffect(()=>{
-          GoogleSignin.configure({
-            webClientId: GOOGLE_WEB_CLIENT_ID,
-          })
-        },[])
+       
     return(
         <SafeAreaView style={styles.loginContainer}>
             <ScrollView contentContainerStyle={styles.scroll}

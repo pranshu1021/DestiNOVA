@@ -144,6 +144,8 @@ const login = async (req, res) => {
 const googleLogin = async(req,res) =>{
 
     try{
+        console.log("Google route hit");
+    console.log(req.body);
             const {idToken} = req.body; // frontend se google id token receive karenge
 
             if(!idToken){

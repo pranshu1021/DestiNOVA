@@ -10,12 +10,13 @@ import {AuthContext} from "../context/AuthContext"
 
 import LoginScreen from "../screens/Auth/LoginScreen";
 import SignupScreen from "../screens/Auth/SignupScreen";
-import HomeScreen from "../screens/Home/HomeScreen";
-import NamePage from "../screens/Screenspages/NamePage";
-import GenderPage from "../screens/Screenspages/GenderPage";
-import BirthTimePage from "../screens/Screenspages/BirthTimePage";
-import DateOfBirthPage from "../screens/Screenspages/DateofBirthPage";
-import PlaceOfBirthPage from "../screens/Screenspages/PlaceofBirthPage";
+import Home from "../screens/Home/HomeScreen";
+
+import Name from "../screens/Screenspages/NamePage";
+import Gender from "../screens/Screenspages/GenderPage";
+import DateOfBirth from "../screens/Screenspages/DateofBirthPage";
+import BirthTime from "../screens/Screenspages/BirthTimePage";
+import PlaceOfBirth from "../screens/Screenspages/BirthPlacePage";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,12 +30,15 @@ export default function AppNavigator(){
         <Stack.Navigator  screenOptions={{headerShown : false}}>
           
             {token ? (<>
-                  {/* <Stack.Screen name="Preview" component={NamePage}/>
-            <Stack.Screen name = "Gender" component={GenderPage}/>
-            <Stack.Screen name = "Birth" component={BirthTimePage}/>
-             <Stack.Screen name = "BirthDate" component={DateOfBirthPage}/>
-             <Stack.Screen name = "BirthPlace" component={PlaceOfBirthPage}/> */}
-                <Stack.Screen name = "Home" component={HomeScreen}/>
+                  <Stack.Screen name="Name" component={Name}/>
+            <Stack.Screen name = "Gender" component={Gender}/>
+            <Stack.Screen name = "DateOfBirth" component={DateOfBirth}/>
+             <Stack.Screen name = "BirthTime" component={BirthTime}/>
+             <Stack.Screen
+    name="BirthPlace"
+    component={PlaceOfBirth}
+  />
+                <Stack.Screen name = "Home" component={Home}/>
             </>
             )
                 
