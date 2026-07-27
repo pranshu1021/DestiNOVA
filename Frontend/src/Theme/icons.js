@@ -9,7 +9,7 @@ export const icons={
     notifications:"notifications-outline",
     help:"help-circle-outline",
     logout:"log-out-outline",
-    calender:"calendor-outline",
+    calendar:"calendar-outline",
     time:"time-outline",
     location:"location-outline",
     checkmark:"checkmark-circle",

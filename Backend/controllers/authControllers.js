@@ -234,6 +234,25 @@ const getProfile = async(req, res)=>{
 }
 
 
+const updateProfile = async(req, res)=>{
+    try{
+        const userId = req.user.id;
+        const{
+            fullName,
+            gender,
+            birthTime,
+            birthPlace,
+            birthLatitude,
+            birthLongitude,
+            profileCompleted
+        } = req.body
+
+        const updateFields = {};
+        if(fullName !==undefined) updateFields.fullName = fullName;
+        if(gender !==undefined) updateFields.gender = gender;
+    }
+}
+
 module.exports = {
 
     signup,
