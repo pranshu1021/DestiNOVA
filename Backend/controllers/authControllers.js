@@ -250,6 +250,11 @@ const updateProfile = async(req, res)=>{
         const updateFields = {};
         if(fullName !==undefined) updateFields.fullName = fullName;
         if(gender !==undefined) updateFields.gender = gender;
+        if(birthTime !==undefined) updateFields.birthTime = birthTime;
+        if(birthPlace !==undefined) updateFields.birthPlace = birthPlace;
+        if(birthLatitude !==undefined) updateFields.birthLatitude = birthLatitude;
+        if(birthLongitude !==undefined) updateFields.birthLongitude = birthLongitude;
+        if(profileCompleted !==undefined) updateFields.profileCompleted = profileCompleted;
     }
 }
 
