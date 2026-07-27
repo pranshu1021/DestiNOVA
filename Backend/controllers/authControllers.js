@@ -255,6 +255,16 @@ const updateProfile = async(req, res)=>{
         if(birthLatitude !==undefined) updateFields.birthLatitude = birthLatitude;
         if(birthLongitude !==undefined) updateFields.birthLongitude = birthLongitude;
         if(profileCompleted !==undefined) updateFields.profileCompleted = profileCompleted;
+
+        const updatedUser= await User.findByIdAndUpdate(
+            userId,{}
+        )
+    }
+    catch(error){
+        res.status(404).json({
+            success:false,
+            message:"User Not Found"
+        })
     }
 }
 
