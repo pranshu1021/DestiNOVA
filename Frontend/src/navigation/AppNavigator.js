@@ -14,7 +14,7 @@ import Home from "../screens/Home/HomeScreen";
 
 import Name from "../screens/Screenspages/NamePage";
 import Gender from "../screens/Screenspages/GenderPage";
-import DateOfBirth from "../screens/Screenspages/DateofBirthPage";
+import DateOfBirth from "../screens/Screenspages/DateOfBirthPage";
 import BirthTime from "../screens/Screenspages/BirthTimePage";
 import PlaceOfBirth from "../screens/Screenspages/BirthPlacePage";
 
