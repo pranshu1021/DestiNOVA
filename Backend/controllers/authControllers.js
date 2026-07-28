@@ -256,23 +256,40 @@ const updateProfile = async(req, res)=>{
         if(birthLongitude !==undefined) updateFields.birthLongitude = birthLongitude;
         if(profileCompleted !==undefined) updateFields.profileCompleted = profileCompleted;
 
+// name.length <3
+        // Pranshu --> Pranshu Gupta -->> pr
         const updatedUser= await User.findByIdAndUpdate(
-            userId,{}
-        )
-    }
-    catch(error){
-        res.status(404).json({
+            userId,
+            {$set: updateFields},
+            {new:true, runValidators:true}
+        ).select("-password");
+
+        if(!updatedUser){
+            return  res.status(404).json({
             success:false,
             message:"User Not Found"
         })
+         return  res.status(200).json({
+            success:true,
+            message:"Profile updated successfully",
+            user: updatedUser
+        })
     }
-}
 
+}
+catch(error){
+    console.log("UpdateProfile error:" , error);
+    return res.status(500).json({
+        success:false,
+        message: "Internal Server Error"
+    })
+}
+}
 module.exports = {
 
     signup,
    googleLogin,
     login,
     getProfile
-
-};
+    , updateProfile
+}

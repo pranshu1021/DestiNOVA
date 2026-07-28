@@ -7,6 +7,7 @@ import AppNavigator from "./src/navigation/AppNavigator.js";
 import AuthProvider from './src/context/AuthContext.js';
 import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "./src/config/googleAuth.js"; //google client ID
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { ThemeProvider } from "./src/context/ThemeContext.js";
 SplashScreen.preventAutoHideAsync().catch(() => {});
 export default function App() {
 useEffect(() => {
@@ -41,12 +42,16 @@ useEffect(() => {
           },[])
   return (
 
-
+    // <AuthProvider>
+    // children
+    // </AuthProvider>
+<ThemeProvider>
     <AuthProvider>
     <NavigationContainer>
          <AppNavigator/>
 </NavigationContainer>
 </AuthProvider>
+</ThemeProvider>
   );
 }
 
