@@ -7,7 +7,7 @@ import {shadows} from "../theme/shadows";
 import { spacing} from "../theme/spacing";
 import { typography } from "../theme/typography";
 import {borderRadius} from "../theme/borderRadius";
-import {animations} from "../theme/borderRadius";
+import {animations} from "../theme/animations";
 import {icons} from "../theme/icons";
 
 export const ThemeContext = createContext();

@@ -9,12 +9,12 @@ import {
     KeyboardAvoidingView,
     ScrollView,
     Platform,
-    AcivityIndicator,
+    
     ActivityIndicator,
 
 } from "react-native";
 
-import { SafeAreaView, useSafeAreaFrame, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import {ThemeContext} from "../../context/ThemeContext";
 import CosmicBackground from "../../components/CosmicBackground"
@@ -44,9 +44,12 @@ export default function OnBoardingLayout({
     const progressPercent = `${(currentStep/totalSteps)*100}%`;
 
     // render karlete hai header block ko at the top of page
-    const renderHeader = () =>{
-        <View>
-            <TouchableOpacity activeOpacity={0.7}
+    const renderHeader = () => {
+        return (
+        <View style={styles.headerContainer}>
+            <TouchableOpacity
+            style={styles.backButton}
+            activeOpacity={0.7}
             onPress={onBack}
             disabled={continueLoading}>
                 <Ionicons name="arrow-back" size={24} color={colors.primary}/>
@@ -72,8 +75,16 @@ export default function OnBoardingLayout({
                         </TouchableOpacity>
                     )}
                 </View>
-                <View style ={[styles.progressBackground,{backgroundColor:colors.border,borderRadius:borderRadius.sm}]}>
-                    </View>
+                <View style={[styles.progressBackground, {
+                    backgroundColor: colors.border,
+                    borderRadius: borderRadius.sm,
+                }]}>
+                    <View style={[styles.progressFill, {
+                        width: progressPercent,
+                        backgroundColor: colors.primary,
+                        borderRadius: borderRadius.sm,
+                    }]} />
+                </View>
             </View>
             {iconName && (
                 <View style={[styles.iconContainer,{backgroundColor:colors.primaryLight, ...shadows.soft}]}>
@@ -90,6 +101,7 @@ export default function OnBoardingLayout({
             color:colors.textSub}]}>
                 {subtitle}</Text>}
         </View>
+        );
 
     };
 
@@ -117,7 +129,7 @@ export default function OnBoardingLayout({
                 ): (
                     <>
                     <Text style = {[styles.continueText, {fontSize: typography.sizes.large,
-                        fontWeight: typography.weight.bold,
+                        fontWeight: typography.weights.bold,
                         color: colors.white
                     }]}>
                         {continueText}
@@ -146,7 +158,7 @@ const renderLayoutContent = () =>{
             behavior={Platform.OS === "ios" ? "padding" : undefined}
             >
                 <ScrollView 
-                contentContainerStyle = {style.scollContent}
+                contentContainerStyle = {styles.scrollContent}
                 keyboardShouldPersistTaps = "handled"
                 showsVerticalScrollIndicator = {false}
                 >
@@ -258,11 +270,16 @@ const styles = StyleSheet.create({
     title:{
         marginTop:8,
         textAlign:"center",
-        lineHeight: 20,
+        lineHeight: 30,
         paddingHorizontal: 15,
 
-    }
-    ,
+    },
+    subtitle:{
+        marginTop: 8,
+        textAlign:"center",
+        lineHeight: 21,
+        paddingHorizontal: 15,
+    },
     footer:{
     paddingHorizontal: 24,
     paddingTop: 10 ,

@@ -53,6 +53,11 @@ const login = async(token, user) =>{
 
 }
 
+const updateUser = async (updatedUser) => {
+    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
+};
+
 // LOGOUT function niche
 
 const logout = async()=>{
@@ -83,6 +88,7 @@ return (
             token,
             loading,
             login,
+            updateUser,
             logout
         }}
         >

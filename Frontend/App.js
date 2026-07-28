@@ -1,57 +1,40 @@
-import * as SplashScreen from "expo-splash-screen"
-import {useEffect} from "react";
-
-import { StatusBar } from 'expo-status-bar';
+import * as SplashScreenNative from "expo-splash-screen";
+import React, { useEffect, useState } from "react";
+import { View } from "react-native";
 import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from "./src/navigation/AppNavigator.js";
 import AuthProvider from './src/context/AuthContext.js';
-import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "./src/config/googleAuth.js"; //google client ID
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { ThemeProvider } from "./src/context/ThemeContext.js";
-SplashScreen.preventAutoHideAsync().catch(() => {});
+import SplashScreen from "./src/screens/Splash/SplashScreen.js";
+import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "./src/config/googleAuth.js";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+
+SplashScreenNative.preventAutoHideAsync().catch(() => {});
+
 export default function App() {
-useEffect(() => {
+  const [showSplash, setShowSplash] = useState(true);
 
-    async function prepare() {
-
-      try {
-
-        // Future:
-        // Load fonts
-        // Load images
-        // Check AsyncStorage
-        // Fetch initial data
-
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-      } finally {
-
-        await SplashScreen.hideAsync();
-
-      }
-
-    }
-
-    prepare();
-
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: GOOGLE_WEB_CLIENT_ID,
+    });
+    SplashScreenNative.hideAsync().catch(() => {});
   }, []);
-   useEffect(()=>{
-            GoogleSignin.configure({
-              webClientId: GOOGLE_WEB_CLIENT_ID,
-            })
-          },[])
-  return (
 
-    // <AuthProvider>
-    // children
-    // </AuthProvider>
-<ThemeProvider>
-    <AuthProvider>
-    <NavigationContainer>
-         <AppNavigator/>
-</NavigationContainer>
-</AuthProvider>
-</ThemeProvider>
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <View style={{ flex: 1 }}>
+          {showSplash ? (
+            <SplashScreen onFinish={() => setShowSplash(false)} />
+          ) : (
+            <NavigationContainer>
+              <AppNavigator />
+            </NavigationContainer>
+          )}
+        </View>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

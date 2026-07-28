@@ -269,12 +269,13 @@ const updateProfile = async(req, res)=>{
             success:false,
             message:"User Not Found"
         })
-         return  res.status(200).json({
+         
+    }
+    return  res.status(200).json({
             success:true,
             message:"Profile updated successfully",
             user: updatedUser
         })
-    }
 
 }
 catch(error){

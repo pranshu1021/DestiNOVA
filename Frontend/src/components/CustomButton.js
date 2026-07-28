@@ -1,6 +1,6 @@
 import React, {useContext, useRef} from "react";
 //useRef this is also an react hook used for references 
-import {Pressable,Text, StyleSheet, AcivityIndicator, Animated} from "react-native";
+import {Pressable,Text, StyleSheet, ActivityIndicator, Animated} from "react-native";
 import {ThemeContext} from "../context/ThemeContext";
 
 export default function CustomButton({
@@ -60,7 +60,7 @@ export default function CustomButton({
         >
 
 {loading ?(
-    <AcivityIndicator size = "small" color= {colors.white}/>
+    <ActivityIndicator size = "small" color= {colors.white}/>
 ):(
     <Text style= {[
         styles.text,
