@@ -25,7 +25,7 @@ export const lightColors = {
   primaryDark: "#5B21B6",
   accent: "#8B5CF6",       
   textMain: "#1E1B4B",      
-  textSub: "#6D28D9",       
+  textSub: "#6a29d4",       
   textMuted: "#A78BFA",      
   border: "#EEE6FF",       
   white: "#FFFFFF",
@@ -34,4 +34,4 @@ export const lightColors = {
   warning: "#F59E0B",
   danger: "#EF4444",
 };
-export const colors = darkColors;
+export const colors = lightColors;

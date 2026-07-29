@@ -1,6 +1,6 @@
 import React,{useState,useContext} from "react";
-import {View,StyleSheet,TouchableOpacity,Text,Alert} from "react-native";
-
+import {View,StyleSheet,Platform,TouchableOpacity,Text,Alert} from "react-native";
+import DateTimerPicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker"
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import OnboardingLayout from "../../components/OnboardingLayout";
@@ -8,19 +8,41 @@ import api from "../../services/api";
 import { AuthContext } from "../../context/AuthContext";
 import { ThemeContext } from "@react-navigation/native";
 
-export default function BirthTimePage(){
+export default function DateOfBirthPage(){
     const navigation=useNavigation();
     const {user,updateUser}=useContext(AuthContext);
     const {colors,borderRadius,shadows}=useContext(ThemeContext);
-    const [datebirth,SetDateBirth]=useState(user?.datebirth || "");
-    const [loading,setLoading]=useState(false);
+
+    const initialDate = user?.dateOfBirth ? new Date(user.dateOfBirth) : new Date();
+    const [date, setDate] = useState(initialDate);
+    const [showPicker,setShowPicker] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const onChange = (event, selectedDate)=>
+    {
+        setShowPicker(Platform.OS ==="ios");
+        if(selectedDate){
+            setDate(selectedDate);
+        }
+    }
+
+    // idhar format set kr rhe hai => en-IN bas ek format hai for dates
+    const formatDate = (value)=>{
+        return value.toLocaleDateString("en-IN",{
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        })
+    }
 
     const handleContinue=async()=>{
         
-        if(!datebirth) return;
+        
         try{
             setLoading(true);
-            const response=await api.post("/update-profile",{datebirth});
+            const response=await api.put("/update-profile",{
+                dateOfBirth: datetoISOString(),
+            });
             if(response.data.success){
                 await updateUser(response.data.user);
                 navigation.navigate("Home");
@@ -31,9 +53,9 @@ export default function BirthTimePage(){
         }
 
         catch(error){
-            console.log("DatebirthPage Error:",error);
+            console.log("DateOfBirthPage Error:",error);
             Alert.alert(
-                "Coneection Error",
+                "Connection Error",
                 error.response?.data?.message || "Failed to connect to the server"
             );
         }
@@ -42,9 +64,14 @@ export default function BirthTimePage(){
         }
 
     };
-    const datebirth=[
-       
-    ]
+
+    const handleSkip = ()=>{
+        navigation.navigate("Home")
+    };
+
+    const handleBack= ()=>{
+        navigation.goBack();
+    }
 
 
 
@@ -52,16 +79,68 @@ export default function BirthTimePage(){
   <OnboardingLayout
   onBack={handleBack}
   currentStep={3}
-  iconName="Date"
-  title="Enter your date of birth"
-  subtitle="This helps us personalize your astrology profile"
+  iconName="calendar"
+  title="Date of Birth"
+  subtitle="Select your birth date to generate accurate astrological insights."
   isScrollable={false}
   onContinue={handleContinue}
-  continueDisabled={!datebirth}
   continueLoading={loading}
+  onSkip={handleSkip}
   >
-    <View></View>
+    <View style = {styles.contentContainer}>
+        <TouchableOpacity
+        activeOpacity={0.8}
+        style={[
+            styles.dateCard,
+            {
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+                borderRadius: borderRadius.md,
+                ...shadows.soft,
+            }
+        ]}
+        onPress={()=>{
+                setShowPicker(true)
+                
+        }}
+        disabled= {loading}
+        >
+            <Ionicons name= "calendar-outline" size={24} color= {colors.primary}/>
+            <Text style = {[styles.dateText , {color:colors.textMain}]}> 
+                {formatDate(date)}
+            </Text>
 
+        </TouchableOpacity>
+
+        {showPicker && (
+            <DateTimePicker
+            value ={date}
+            mode = "date"
+            display="default"
+            maximumDate = {new Date()}
+            onChange={onChange}
+            />
+        )}
+    </View>
   </OnboardingLayout>
    ) 
 }
+
+const styles = StyleSheet.create({
+    contentContainer: {
+        marginVertical:10,
+        width:"100%"
+    },
+    dateCard:{
+        flexDirection:"row",
+        alignItems:"center",
+        height: 60,
+        paddingHorizontal:20,
+        borderWidth:1.5,
+    },
+    dateText:{
+        marginLeft:15,
+        fontSize:16,
+        fontWeight: "600",
+    }
+})
