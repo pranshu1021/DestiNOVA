@@ -240,6 +240,7 @@ const updateProfile = async(req, res)=>{
         const{
             fullName,
             gender,
+            dateOfBirth,
             birthTime,
             birthPlace,
             birthLatitude,
@@ -250,6 +251,7 @@ const updateProfile = async(req, res)=>{
         const updateFields = {};
         if(fullName !==undefined) updateFields.fullName = fullName;
         if(gender !==undefined) updateFields.gender = gender;
+        if(dateOfBirth !==undefined) updateFields.dateOfBirth = dateOfBirth;
         if(birthTime !==undefined) updateFields.birthTime = birthTime;
         if(birthPlace !==undefined) updateFields.birthPlace = birthPlace;
         if(birthLatitude !==undefined) updateFields.birthLatitude = birthLatitude;

@@ -40,6 +40,7 @@ export default function DateOfBirthPage(){
         
         try{
             setLoading(true);
+            console.log("DOB:", date.toISOString());
             const response=await api.put("/update-profile",{
                 dateOfBirth: date.toISOString(),
             });
