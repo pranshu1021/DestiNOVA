@@ -6,7 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import OnboardingLayout from "../../components/OnboardingLayout";
 import api from "../../services/api";
 import { AuthContext } from "../../context/AuthContext";
-import { ThemeContext } from "@react-navigation/native";
+import { ThemeContext } from "../../context/ThemeContext";
 
 export default function DateOfBirthPage(){
     const navigation=useNavigation();
@@ -95,8 +95,8 @@ export default function DateOfBirthPage(){
             {
                 backgroundColor: colors.card,
                 borderColor: colors.border,
-                borderRadius: borderRadius.md,
                 ...shadows.soft,
+                borderRadius:borderRadius.md
             }
         ]}
         onPress={()=>{

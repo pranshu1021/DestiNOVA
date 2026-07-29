@@ -34,4 +34,4 @@ export const lightColors = {
   warning: "#F59E0B",
   danger: "#EF4444",
 };
-export const colors = lightColors;
+export const colors = darkColors;
