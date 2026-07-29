@@ -80,24 +80,25 @@ export default function SignupScreen(){
                 <Text style={styles.title} > Create Account </Text>
                 <Text style={styles.subtitle}> Join DestiNOVA and begin your spiritual journey.</Text>
 
-                <TextInput style={styles.input} placeholder="Full Name" value={fullName} onChangeText={setFullName}
+                <TextInput style={styles.input} placeholder="Full Name" placeholderTextColor="#6B7280" value={fullName} onChangeText={setFullName}
                 />
 
-                <TextInput style={styles.input} placeholder = "Enter email" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail}
+                <TextInput style={styles.input} placeholder = "Enter email" placeholderTextColor="#6B7280" keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail}
                 />
 
                 <TextInput style={styles.input}
                 placeholder="Enter Mobile Number"
+                placeholderTextColor="#6B7280"
                 keyboardType="phone-pad" 
                 value={phone}
                 onChangeText={setPhone}/>
 
-                <TextInput style={styles.input} placeholder="Enter Password" 
+                <TextInput style={styles.input} placeholder="Enter Password" placeholderTextColor="#6B7280"
                 value={password}
                 onChangeText= {setPassword}
                 secureTextEntry/>
                 
-                <TextInput style={styles.input} placeholder="Confirm Password" 
+                <TextInput style={styles.input} placeholder="Confirm Password" placeholderTextColor="#6B7280"
                 value={confirmPassword}
                 onChangeText= {setConfirmPassword}
                 secureTextEntry/>

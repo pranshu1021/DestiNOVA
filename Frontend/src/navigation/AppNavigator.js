@@ -13,7 +13,7 @@ import SignupScreen from "../screens/Auth/SignupScreen";
 import Home from "../screens/Home/HomeScreen";
 
 import Name from "../screens/Screenspages/NamePage";
-
+import Gender from "../screens/Screenspages/GenderPage"
 
 
 const Stack = createNativeStackNavigator();
@@ -36,7 +36,8 @@ export default function AppNavigator(){
                 ) : (
                     <>
                         <Stack.Screen name="Name" component={Name}/>
-                        {/* <Stack.Screen name="Gender" component={Gender}/>
+                        <Stack.Screen name="Gender" component={Gender}/>
+                        {/* 
                         <Stack.Screen name="DateOfBirth" component={DateOfBirth}/>
                         <Stack.Screen name="BirthTime" component={BirthTime}/>
                         <Stack.Screen name="BirthPlace" component={PlaceOfBirth}/> */}

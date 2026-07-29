@@ -1,14 +1,14 @@
 export const darkColors = {
-  background: "#12071F",      // Deep cosmic black/plum
-  card: "#1A102B",            // Midnight Plum card
+  background: "#12071F",      
+  card: "#1A102B",            
   cardBorder: "#2D1D4A",
-  primary: "#7C3AED",         // Deep Violet
+  primary: "#7C3AED",        
   primaryLight: "#A78BFA",
   primaryDark: "#5B21B6",
-  accent: "#D8B4FE",          // Light Lavender
-  textMain: "#F3E8FF",        // Lilac White
-  textSub: "#C084FC",         // Bright Lavender
-  textMuted: "#7C3AED",       // Darker Violet for labels
+  accent: "#D8B4FE",          
+  textMain: "#F3E8FF",        
+  textSub: "#C084FC",        
+  textMuted: "#7C3AED",      
   border: "#24143B",
   white: "#FFFFFF",
   success: "#10B981",
@@ -16,25 +16,22 @@ export const darkColors = {
   warning: "#F59E0B",
   danger: "#EF4444",
 };
-
 export const lightColors = {
-  background: "#F8F4FF",     // Soft Warm Lilac White
-  card: "#FFFFFF",           // Bright White card
+  background: "#F8F4FF",     
+  card: "#FFFFFF",           
   cardBorder: "#E8D8FF",
-  primary: "#7C3AED",        // Deep Violet
+  primary: "#7C3AED",        
   primaryLight: "#DDD6FE",
   primaryDark: "#5B21B6",
-  accent: "#8B5CF6",         // Bright Purple
-  textMain: "#1E1B4B",       // Midnight Indigo
-  textSub: "#6D28D9",        // Darker Lavender
-  textMuted: "#A78BFA",      // Light Violet labels
-  border: "#EEE6FF",         // Light Lavender divider
+  accent: "#8B5CF6",       
+  textMain: "#1E1B4B",      
+  textSub: "#6D28D9",       
+  textMuted: "#A78BFA",      
+  border: "#EEE6FF",       
   white: "#FFFFFF",
   success: "#10B981",
   successBg: "#ECFDF5",
   warning: "#F59E0B",
   danger: "#EF4444",
 };
-
-// Fallback compatibility with previous imports
-export const colors = lightColors;
+export const colors = darkColors;

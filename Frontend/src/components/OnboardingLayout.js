@@ -16,20 +16,20 @@ import CosmicBackground from "./CosmicBackground";
 
 export default function OnboardingLayout({
   children,
-  // Header props
+ 
   onBack,
   currentStep,
   totalSteps = 5,
   iconName,
   title,
   subtitle,
-  // Scroll behavior
+  
   isScrollable = false,
-  // Footer props
+ 
   onContinue,
   continueDisabled = false,
   continueLoading = false,
-  continueText = "Continue",
+  continueText = "Next",
   onSkip,
   skipText = "Skip for now",
 }) {
@@ -37,10 +37,9 @@ export default function OnboardingLayout({
   const insets = useSafeAreaInsets();
   const progressPercent = `${(currentStep / totalSteps) * 100}%`;
 
-  // Render Header block
   const renderHeader = () => (
     <View style={styles.headerContainer}>
-      {/* Back Button */}
+
       {onBack && (
         <TouchableOpacity
           style={[styles.backButton, { backgroundColor: colors.card, ...shadows.soft }]}
@@ -52,7 +51,6 @@ export default function OnboardingLayout({
         </TouchableOpacity>
       )}
 
-      {/* Progress & Step Info */}
       <View style={styles.progressContainer}>
         <View style={styles.stepInfoRow}>
           <Text style={[styles.stepText, { fontSize: typography.sizes.small, color: colors.textSub, fontWeight: typography.weights.semiBold }]}>
@@ -71,14 +69,14 @@ export default function OnboardingLayout({
         </View>
       </View>
 
-      {/* Cosmic Icon */}
+
       {iconName && (
         <View style={[styles.iconContainer, { backgroundColor: colors.primaryLight, ...shadows.soft }]}>
           <Ionicons name={iconName} size={48} color={colors.primary} />
         </View>
       )}
 
-      {/* Title & Subtitle */}
+    
       {title && <Text style={[styles.title, { fontSize: typography.sizes.h2, fontWeight: typography.weights.bold, color: colors.textMain }]}>{title}</Text>}
       {subtitle && <Text style={[styles.subtitle, { fontSize: typography.sizes.body, color: colors.textSub }]}>{subtitle}</Text>}
     </View>

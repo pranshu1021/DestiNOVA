@@ -15,3 +15,4 @@ export const typography = {
     regular: "400",
   },
 };
+
