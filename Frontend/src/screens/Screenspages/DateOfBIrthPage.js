@@ -1,6 +1,6 @@
 import React,{useState,useContext} from "react";
 import {View,StyleSheet,Platform,TouchableOpacity,Text,Alert} from "react-native";
-import DateTimerPicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker"
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import OnboardingLayout from "../../components/OnboardingLayout";
@@ -41,7 +41,7 @@ export default function DateOfBirthPage(){
         try{
             setLoading(true);
             const response=await api.put("/update-profile",{
-                dateOfBirth: datetoISOString(),
+                dateOfBirth: date.toISOString(),
             });
             if(response.data.success){
                 await updateUser(response.data.user);
