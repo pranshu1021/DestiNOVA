@@ -15,7 +15,7 @@ import Home from "../screens/Home/HomeScreen";
 import Name from "../screens/Screenspages/NamePage";
 import Gender from "../screens/Screenspages/GenderPage"
 import DateOfBirth from "../screens/Screenspages/DateOfBirthPage"
-
+import BirthTime from "../screens/Screenspages/BirthTimePage";
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator(){
@@ -38,9 +38,10 @@ export default function AppNavigator(){
                         <Stack.Screen name="Name" component={Name}/>
                         <Stack.Screen name="Gender" component={Gender}/>
                         <Stack.Screen name="DateOfBirth" component={DateOfBirth}/>
+                        <Stack.Screen name="BirthTime" component={BirthTime}/>
                         {/* 
                         
-                        <Stack.Screen name="BirthTime" component={BirthTime}/>
+                        
                         <Stack.Screen name="BirthPlace" component={PlaceOfBirth}/> */}
                         <Stack.Screen name="Home" component={Home}/>
                         {/* <Stack.Screen name="Profile" component={ProfileScreen}/> */}
