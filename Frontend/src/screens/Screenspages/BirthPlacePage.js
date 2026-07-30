@@ -86,7 +86,7 @@ export default function BirthPlacePage(){
     }
 
     const handleContinue = async()=>{
-        if(!selected) return;
+        if(!selectedPlace) return;
 
         try{
             setLoading(true);
@@ -222,7 +222,7 @@ export default function BirthPlacePage(){
                             style ={[styles.placeCard, {
                                 borderBottomColor: colors.border
                             }]}
-                            onLongPress={()=>handleSelect(item)}>
+                            onPress={()=>handleSelect(item)}>
                                 <Ionicons name = "location-outline" size = {20} 
                                 color= {colors.primary}/>
                                 <View style = {styles.placeTextContainer}>
@@ -255,7 +255,7 @@ export default function BirthPlacePage(){
                                     color: colors.textMain
                                 }]}>
                                     {
-                                        selectedPlaec.display_name
+                                        selectedPlace.display_name
                                     }
                                 </Text>
                             </View>
@@ -268,7 +268,7 @@ export default function BirthPlacePage(){
 }
 
 const styles = StyleSheet.create({
-    contenContainer: {
+    contentContainer: {
         marginVertical:10, 
         width: "100%",
     },
