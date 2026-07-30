@@ -13,6 +13,7 @@ import { StyleSheet,
         import {SafeAreaView} from "react-native-safe-area-context";
 import AstrologerCard from "../../components/AstrologerCard"
 import NewsCard from "../../components/NewsCard";
+import HoroscopeCard from "../../components/HoroscopeCard";
 export default function HomeScreen() {
   const {user, logout} = useContext(AuthContext);
   return (
@@ -127,14 +128,18 @@ export default function HomeScreen() {
       </Pressable>
     </View>
     <NewsCard/>
+     <HoroscopeCard/>
     <NewsCard/>
     <NewsCard/>
     <NewsCard/>
-    
 
+            <HoroscopeCard/>
+           
+            
     <AstrologerCard/>
     <AstrologerCard/>
     <AstrologerCard/>
+    <HoroscopeCard/>
     <AstrologerCard/>
     </ScrollView>
     <StatusBar styles="auto"/>
