@@ -11,8 +11,8 @@ import { StyleSheet,
         ScrollView,
         SafeAreaViewBase} from 'react-native';
         import {SafeAreaView} from "react-native-safe-area-context";
-
-
+import AstrologerCard from "../../components/AstrologerCard"
+import NewsCard from "../../components/NewsCard";
 export default function HomeScreen() {
   const {user, logout} = useContext(AuthContext);
   return (
@@ -126,6 +126,16 @@ export default function HomeScreen() {
         <Text style={styles.buttonText}> Upgrade Now</Text>
       </Pressable>
     </View>
+    <NewsCard/>
+    <NewsCard/>
+    <NewsCard/>
+    <NewsCard/>
+    
+
+    <AstrologerCard/>
+    <AstrologerCard/>
+    <AstrologerCard/>
+    <AstrologerCard/>
     </ScrollView>
     <StatusBar styles="auto"/>
    </SafeAreaView>

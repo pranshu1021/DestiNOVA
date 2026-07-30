@@ -81,7 +81,7 @@ export default function BirthTimePage(){
 
              if(response.data.success){
                             await updateUser(response.data.user)
-                            navigation.navigate("Home");
+                            navigation.navigate("BirthPlace");
                         }
                         else{
                             Alert.alert("Error", response.data.message|| "Failed to update profile"); 
