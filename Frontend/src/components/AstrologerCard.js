@@ -88,7 +88,7 @@ import {ThemeContext} from "../context/ThemeContext"
                      color:colors.primary,
                      marginBottom: spacing.sm
                   }]}>
-                     ${price}/min
+                     ₹{price}/min
                   </Text>
                   <TouchableOpacity
                   activeOpacity={0.7}
