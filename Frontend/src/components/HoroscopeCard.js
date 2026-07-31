@@ -36,15 +36,15 @@ export default function HoroscopeCard({
                 }
 
             ]}>
-                {/* {signName} */}Tauras
+                {signName}
             </Text>
             {
                 dateRange && <Text style ={[styles.dateRangeText, {
                     fontSize: typography.weights.bold,
                     color: colors.primary
                 }]}>
-                    {/* {dateRange} */}
-                    16 Feb,2018 to 18 Feb,2019
+                    {dateRange}
+                   
                     </Text>
             }
         </View>
@@ -57,7 +57,7 @@ export default function HoroscopeCard({
         lineHeight: 22,
         marginBottom: spacing.xl
     }]}>
-        {/* {prediction} */} You'll meet someone today.
+        {prediction} 
     </Text>
 
     <View style = {[
@@ -81,7 +81,7 @@ export default function HoroscopeCard({
                 fontSize: typography.sizes.large, 
                 fontWeight:typography.weights.bold, color: colors.primary
             }]}>
-                {/* {luckyColor} */}red
+                {luckyColor}
             </Text>
         </View>
 
@@ -100,7 +100,7 @@ export default function HoroscopeCard({
                 fontSize: typography.sizes.large, 
                 fontWeight:typography.weights.bold, color: colors.primary
             }]}>
-                {/* {luckyNumber} */}1
+                {luckyNumber}
             </Text>
         </View>
         
@@ -119,7 +119,7 @@ export default function HoroscopeCard({
                 fontSize: typography.sizes.large, 
                 fontWeight:typography.weights.bold, color: colors.primary
             }]}>
-                {/* {luckyAlphabet} */}P
+                {luckyAlphabet}
             </Text>
         </View>
     </View>
