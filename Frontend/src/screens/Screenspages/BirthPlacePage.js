@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
     },
     selectedTitle:{
         fontWeight: "700",
-        fontSize:"13",
+        fontSize:13,
         textTransform:"uppercase",
         letterSpacing: 0.5,
         marginBottom: 2,

@@ -37,7 +37,7 @@ export default function HoroscopeCard({
             </Text>
             {
                 dateRange && <Text style ={[styles.dateRangeText, {
-                    fontSize: typography.weights.bold,
+                    fontSize: typography.sizes.small,
                     color: colors.primary
                 }]}>
                     {dateRange}
