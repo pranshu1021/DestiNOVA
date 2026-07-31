@@ -22,7 +22,7 @@ import {ThemeContext} from "../context/ThemeContext"
                   borderColor:colors.cardBorder,
                   borderRadius:borderRadius.lg,
                   padding:spacing.md,
-                  marginBorder:spacing.md,
+                  marginBottom:spacing.md,
                   ...shadows.soft
 
                }
@@ -43,7 +43,7 @@ import {ThemeContext} from "../context/ThemeContext"
                </View>
 
                <View style = {[styles.infoContainer, {marginLeft : spacing.lg}]}>
-                  <Text numberOfLines={1} style= {[styles.nameText, {fontSze:typography.sizes.large,fontWeight:
+                  <Text numberOfLines={1} style= {[styles.nameText, {fontSize:typography.sizes.large,fontWeight:
                      typography.weights.bold, 
                      color:colors.textMain 
                   }]}>
@@ -55,27 +55,47 @@ import {ThemeContext} from "../context/ThemeContext"
                      {specialty}
                   </Text>
 
-                  <View style = {[styles.metricItem]}>
-                     <Ionicons name ="star" size={13} color ="#FBBF24" />
-                     <Text style={[styles.metricText,{
-                        fontSize:typography.sizes.small,
-                        color:colors.textSub,
-                        fontWeight:weights.medium
-                     }]}>
-                        {rating}
-                     </Text>
+<View style={styles.metricsRow}>
+   <View style={styles.metricItem}>
+      <Ionicons name="star" size={13} color="#FBBF24" />
 
-                     <View style= {[styles.metricDivider, {
-                        backgroundColor: colors.textMuted, 
-                        marginHorizontal:spacing.sm
-                     }]}>
-                        <Text style = {[styles.metricText , {fontSize: typography.sizes.small,
-                           color:colors.textSub,fontWeight: typography.weights.medium
-                        }]}>
-                           {experience} yrs exp
-                        </Text>
-                     </View>
-                  </View>
+      <Text
+         style={[
+            styles.metricText,
+            {
+               fontSize: typography.sizes.small,
+               color: colors.textSub,
+               fontWeight: typography.weights.medium,
+            },
+         ]}
+      >
+         {rating}
+      </Text>
+   </View>
+
+   <View
+      style={[
+         styles.metricDivider,
+         {
+            backgroundColor: colors.textMuted,
+            marginHorizontal: spacing.sm,
+         },
+      ]}
+   />
+
+   <Text
+      style={[
+         styles.metricText,
+         {
+            fontSize: typography.sizes.small,
+            color: colors.textSub,
+            fontWeight: typography.weights.medium,
+         },
+      ]}
+   >
+      {experience} yrs exp
+   </Text>
+</View>
                </View>
 
                
@@ -120,11 +140,7 @@ const styles = StyleSheet.create({
       borderWidth:1.5
       ,
    }
-   ,
-   imageContainer:{
-      position: "relative",
 
-   }
    ,
    imageContainer:{
       position:"relative",
@@ -141,7 +157,7 @@ const styles = StyleSheet.create({
    avatarPlaceholder:{
       width:60,
       height:60,
-      bordeRadius:30,
+      borderRadius:30,
       justifyContent:"center",
       alignItems:"center",
       borderWidth:1.5,
@@ -171,7 +187,7 @@ const styles = StyleSheet.create({
    metricText:{
       marginLeft:3,
    },
-   metricItems:{
+   metricItem:{
       flexDirection:"row",
       alignItems:"center",
 
