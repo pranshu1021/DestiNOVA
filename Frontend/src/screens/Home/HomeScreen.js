@@ -18,7 +18,7 @@ export default function HomeScreen() {
   const {user, logout} = useContext(AuthContext);
   return (
     <SafeAreaView style={styles.container}>
-   
+
       <ScrollView >
 
     
