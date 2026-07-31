@@ -28,7 +28,7 @@ export default function HomeScreen() {
   const { colors, typography, borderRadius, shadows, isDark } = useContext(ThemeContext);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Handle Android hardware back press to close Drawer first
+
   useEffect(() => {
     const backAction = () => {
       if (isDrawerOpen) {
@@ -46,7 +46,7 @@ export default function HomeScreen() {
     return () => backHandler.remove();
   }, [isDrawerOpen]);
 
-  // Mock Dynamic Data
+
   const dailyHoroscope = {
     signName: "Leo",
     dateRange: "July 23 - Aug 22",
