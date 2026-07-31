@@ -12,16 +12,16 @@ export default function HomeSection({ title, children, actionText, onActionPress
           {title}
         </Text>
         {actionText && onActionPress && (
-          <TouchableOpacity activeOpacity={0.7} onPress={onActionPress}>
+            <TouchableOpacity activeOpacity={0.7} onPress={onActionPress}>
             <Text style={[styles.actionText, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.primary }]}>
-              {actionText}
+                 {actionText}
             </Text>
-          </TouchableOpacity>
+            </TouchableOpacity>
         )}
-      </View>
-      <View style={styles.contentContainer}>
-        {children}
-      </View>
+        </View>
+        <View style={styles.contentContainer}>
+          {children}
+       </View>
     </View>
   );
 }

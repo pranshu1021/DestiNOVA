@@ -32,7 +32,7 @@ export default function CosmicBackground({children}){
                 left: SCREEN_WIDTH * 0.35,
                 width: SCREEN_WIDTH * 0.95,
                 height: SCREEN_WIDTH * 0.95,
-                bordeRadius: SCREEN_WIDTH * 0.475,
+                borderRadius: SCREEN_WIDTH * 0.475,
                                 backgroundColor: isDark? "rgb(139,92,246,0.04)" : "rgba(238, 230, 255, 0.32)"
 
             }]}
