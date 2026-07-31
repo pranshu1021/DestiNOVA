@@ -10,18 +10,16 @@ export default function HoroscopeCard({
  luckyNumber,
  luckyAlphabet
 }){
- const { colors, spacing, typography, borderRadius, shadows} = useContext(ThemeContext);
+ const {colors, spacing, typography, borderRadius, shadows} = useContext(ThemeContext);
  return (
     <View style={[
         styles.card,
         {
-
             backgroundColor: colors.card,
             borderColor: colors.cardBorder,
             borderRadius: borderRadius.xl,
             padding: spacing.xl,
             ...shadows.soft,
-
         }
     ]}>
         <View style = {[styles.headerRow, {
@@ -34,7 +32,6 @@ export default function HoroscopeCard({
                     fontWeight: typography.weights.bold,
                     color: colors.primary
                 }
-
             ]}>
                 {signName}
             </Text>
@@ -125,9 +122,8 @@ export default function HoroscopeCard({
     </View>
     
     </View>
-
         
- )
+)
 }
 const styles = StyleSheet.create({
     card:{
@@ -167,6 +163,4 @@ const styles = StyleSheet.create({
         width: 1.5,
         height:24,
     }
-
-
 })

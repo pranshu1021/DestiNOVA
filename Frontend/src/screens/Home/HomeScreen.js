@@ -1,268 +1,286 @@
-import React, { useContext } from "react";
-import {AuthContext} from "../../context/AuthContext"
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet,
-   Text,
-   
-    View ,
-     Pressable,
-      Image,
-       TextInput,
-        ScrollView,
-        SafeAreaViewBase} from 'react-native';
-        import {SafeAreaView} from "react-native-safe-area-context";
-import AstrologerCard from "../../components/AstrologerCard"
-import NewsCard from "../../components/NewsCard";
+import React, { useState, useEffect, useContext } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  StatusBar,
+  BackHandler,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import { AuthContext } from "../../context/AuthContext";
+import { ThemeContext } from "../../context/ThemeContext";
+import { spacing } from "../../theme/spacing";
+import Header from "../../components/Header";
+import AstroDrawer from "../../components/AstroDrawer";
+import HomeSection from "../../components/HomeSection";
+import AstrologerCard from "../../components/AstrologerCard";
 import HoroscopeCard from "../../components/HoroscopeCard";
+import CosmicBackground from "../../components/CosmicBackground";
+import { Ionicons } from "@expo/vector-icons";
+
 export default function HomeScreen() {
-  const {user, logout} = useContext(AuthContext);
+  const navigation = useNavigation();
+  const { user, logout } = useContext(AuthContext);
+  const { colors, typography, borderRadius, shadows, isDark } = useContext(ThemeContext);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  // Handle Android hardware back press to close Drawer first
+  useEffect(() => {
+    const backAction = () => {
+      if (isDrawerOpen) {
+        setIsDrawerOpen(false);
+        return true;
+      }
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [isDrawerOpen]);
+
+  // Mock Dynamic Data
+  const dailyHoroscope = {
+    signName: "Leo",
+    dateRange: "July 23 - Aug 22",
+    prediction: "Leo, today the alignment of Mars and Jupiter sparks your creative ambition. Trust your intuition when making key decisions. It's a wonderful day to express your feelings to someone close.",
+    luckyColor: "Amber Golden",
+    luckyNumber: "9",
+    luckyAlphabet: "L",
+  };
+
+  const topAstrologers = [
+    {
+      id: "1",
+      name: "Astro Ramesh",
+      specialty: "Vedic Astrology, Kundli",
+      experience: 12,
+      rating: 4.8,
+      price: 25,
+      isOnline: true,
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop",
+    },
+    {
+      id: "2",
+      name: "Tarot Mamta",
+      specialty: "Tarot Cards, Face Reading",
+      experience: 8,
+      rating: 4.9,
+      price: 30,
+      isOnline: true,
+      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop",
+    },
+    {
+      id: "3",
+      name: "Guru Dutt",
+      specialty: "Palmistry, Numerology",
+      experience: 15,
+      rating: 4.7,
+      price: 40,
+      isOnline: false,
+      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300&auto=format&fit=crop",
+    },
+  ];
+
+  const handleFeatureAlert = (featureName) => {
+    Alert.alert("DestiNOVA", `${featureName} feature is coming soon!`);
+  };
+
+  const getGreeting = () => {
+    const hrs = new Date().getHours();
+    if (hrs < 12) return "Good Morning";
+    if (hrs < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <CosmicBackground>
+      <SafeAreaView style={styles.safeContainer} edges={["top", "left", "right"]}>
+        <StatusBar
+          barStyle={isDark ? "light-content" : "dark-content"}
+          backgroundColor={colors.card}
+        />
+        
 
-      <ScrollView >
+        <Header
+          user={user}
+          onLeftPress={() => setIsDrawerOpen(true)}
+          onRightPress={() => handleFeatureAlert("Notifications")}
+        />
 
-    
-    <View style={styles.header}>
-        <Text style={styles.greeting}>Welcome</Text>
-        <Text style= {styles.name}>Good Morning {user?.fullName}</Text>
-    </View>
-    <Pressable style = {styles.Notification}>
-      <Text style={styles.icon}>🔔</Text>
-    </Pressable>
-    <Pressable onPress={logout} style = {styles.Notification}>
-      <Text style={styles.icon}>Logout</Text>
-    </Pressable>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: spacing.xxxl }]}
+        >
+        
+          <View style={[styles.welcomeBanner, { paddingHorizontal: spacing.xxl, paddingTop: spacing.lg }]}>
+            <Text style={[styles.greetingText, { fontSize: typography.sizes.body, color: colors.textSub, fontWeight: typography.weights.medium }]}>
+              {getGreeting()},
+            </Text>
+            <Text style={[styles.userNameText, { fontSize: typography.sizes.h1, fontWeight: typography.weights.bold, color: colors.textMain }]}>
+              {user?.fullName || "Astro Explorer"}
+            </Text>
+          </View>
 
-    <View style={styles.searchBar}>
-      <Text style={styles.searchText}>Search Astrologers</Text>
+       
+          <HomeSection title="Explore Astrology">
+            <View style={styles.categoryGrid}>
+              <TouchableOpacity
+                style={[styles.categoryCard, { backgroundColor: colors.card, borderColor: colors.cardBorder, ...shadows.soft }]}
+                activeOpacity={0.7}
+                onPress={() => handleFeatureAlert("Zodiac Horoscope")}
+              >
+                <View style={[styles.categoryIconCircle, { backgroundColor: isDark ? "rgba(124, 90, 237, 0.15)" : "#EEF2FF" }]}>
+                  <Ionicons name="planet" size={24} color={colors.primary} />
+                </View>
+                <Text style={[styles.categoryText, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textMain }]}>
+                  Horoscope
+                </Text>
+              </TouchableOpacity>
 
-    </View>
+              <TouchableOpacity
+                style={[styles.categoryCard, { backgroundColor: colors.card, borderColor: colors.cardBorder, ...shadows.soft }]}
+                activeOpacity={0.7}
+                onPress={() => handleFeatureAlert("Kundli Matcher")}
+              >
+                <View style={[styles.categoryIconCircle, { backgroundColor: isDark ? "rgba(139, 92, 246, 0.12)" : "#F5F3FF" }]}>
+                  <Ionicons name="heart" size={24} color={colors.accent} />
+                </View>
+                <Text style={[styles.categoryText, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textMain }]}>
+                  Kundli
+                </Text>
+              </TouchableOpacity>
 
-    <View style={styles.banner}>
-      <Text style={styles.bannerTitle}>
-        Daily Horoscope
-      </Text>
-            <Text style={styles.bannerSubtitle}>
-        Discover what the stars have planned for you today.
-      </Text>
-    </View>
-<Text style={styles.sectionTitle}>
-  Categories
-</Text>
+              <TouchableOpacity
+                style={[styles.categoryCard, { backgroundColor: colors.card, borderColor: colors.cardBorder, ...shadows.soft }]}
+                activeOpacity={0.7}
+                onPress={() => handleFeatureAlert("AI Chatbot")}
+              >
+                <View style={[styles.categoryIconCircle, { backgroundColor: isDark ? "rgba(16, 185, 129, 0.12)" : "#ECFDF5" }]}>
+                  <Ionicons name="chatbubble-ellipses" size={24} color={colors.success} />
+                </View>
+                <Text style={[styles.categoryText, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textMain }]}>
+                  AI Chat
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </HomeSection>
 
-    <View style = {styles.categoryContainer}>
-      <Pressable style={styles.category} >
-        <Text>
-          Horoscope
-        </Text>
-      </Pressable>
-            <Pressable style={styles.category}>
-        <Text>
-          Kundli
-        </Text>
-      </Pressable>
-            {/* <Pressable style={styles.category}>
-        <Text>
-          Match-Making
-        </Text>
-      </Pressable> */}
-            <Pressable style={styles.category}>
-        <Text>
-          Ai Chat
-        </Text>
-      </Pressable>
+      
+          <HomeSection title="Today's Horoscope">
+            <HoroscopeCard {...dailyHoroscope} />
+          </HomeSection>
 
-    </View>
+  
+          <View style={[styles.premiumBanner, { backgroundColor: colors.primary, marginHorizontal: spacing.xxl, marginVertical: spacing.lg, padding: spacing.xl, borderRadius: borderRadius.xl, ...shadows.primaryGlow }]}>
+            <View style={{ marginBottom: spacing.md }}>
+              <Text style={[styles.premiumTitle, { fontSize: typography.sizes.h3, fontWeight: typography.weights.bold, color: colors.white }]}>
+                Unlock Cosmic Insights
+              </Text>
+              <Text style={[styles.premiumSubtitle, { fontSize: typography.sizes.body, color: isDark ? colors.accent : "#E0E7FF" }]}>
+                Get unlimited AI chat, complete compatibility matches, and daily custom predictions.
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={[styles.premiumButton, { backgroundColor: colors.white, borderRadius: borderRadius.md }]}
+              activeOpacity={0.8}
+              onPress={() => handleFeatureAlert("Upgrade Plan")}
+            >
+              <Text style={[styles.premiumButtonText, { color: colors.primary, fontSize: typography.sizes.body, fontWeight: typography.weights.bold }]}>
+                Upgrade Now
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-    
-      <Text style={styles.sectionTitle}>Today's Prediction</Text>
+       
+          <HomeSection title="Top Astrologers" actionText="See All" onActionPress={() => handleFeatureAlert("Astrologers List")}>
+            {topAstrologers.map((astro) => (
+              <AstrologerCard
+                key={astro.id}
+                name={astro.name}
+                specialty={astro.specialty}
+                experience={astro.experience}
+                rating={astro.rating}
+                price={astro.price}
+                image={astro.image}
+                isOnline={astro.isOnline}
+                onPress={() => handleFeatureAlert(`Chat with ${astro.name}`)}
+              />
+            ))}
+          </HomeSection>
+        </ScrollView>
 
-      <View style={styles.card} >
-        <Text style={styles.cardTitle}>Cancer</Text>
-
-        <Text style={styles.cardText}> Cancer, you have good intuition today, so follow your gut and support a buddy in need. Spend some time unwinding and clearing your head.</Text>
-        <Text style={styles.cardText}>
-          Lucky Color : Blue
-        </Text>
-                <Text style={styles.cardText}>
-          Lucky Number : 7
-        </Text>
-                <Text style={styles.cardText}>
-          Lucky Alphabet : B
-        </Text>
-    </View>
-
-    <View style={styles.card}>
-      <Text style={styles.cardTitle}> 
-        Dummy Name
-      </Text>
-      <Text > 
-        4.6 Rating
-      </Text>
-      <Text > 
-      10+ Years Experience
-      </Text>
-    </View>
-    <View style={styles.card}>
-      <Text style={styles.cardTitle}> 
-        Dummy Name 2
-      </Text>
-      <Text > 
-        4.1 Rating
-      </Text>
-      <Text > 
-      15+ Years Experience
-      </Text>
-    </View>
-
-    <View style={styles.premium}>
-      <Text style={styles.premiumTitle}>
-        Unlock Premium Astrology
-      </Text>
-            <Text style={styles.premiumText}>
-        AI Chat, Tarot Reading, Premium Predictions and more.
-      </Text>
-
-      <Pressable style={styles.button}>
-        <Text style={styles.buttonText}> Upgrade Now</Text>
-      </Pressable>
-    </View>
-    <NewsCard/>
-     <HoroscopeCard/>
-    <NewsCard/>
-    <NewsCard/>
-    <NewsCard/>
-
-            <HoroscopeCard/>
-           
-            
-    <AstrologerCard/>
-    <AstrologerCard/>
-    <AstrologerCard/>
-    <HoroscopeCard/>
-    <AstrologerCard/>
-    </ScrollView>
-    <StatusBar styles="auto"/>
-   </SafeAreaView>
-
+        
+        <AstroDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          user={user}
+          onViewProfile={() => navigation.navigate("Profile")}
+          onPremium={() => handleFeatureAlert("Premium")}
+          onHoroscope={() => handleFeatureAlert("Horoscope")}
+          onKundli={() => handleFeatureAlert("Kundli Matching")}
+          onAIChat={() => handleFeatureAlert("AI Chat")}
+          onNotifications={() => handleFeatureAlert("Notifications")}
+          onHelp={() => handleFeatureAlert("Help Center")}
+          onLogout={logout}
+        />
+      </SafeAreaView>
+    </CosmicBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeContainer: {
     flex: 1,
-    backgroundColor: 'white',
-    alignItems: 'center',
-    paddingTop: 50,
-    justifyContent: 'center',
   },
-  header: {
-    flexDirection:"row",
-    justifyContent:"space-between",
-    alignItems:"center",
-    paddingHorizontal:20,
+  scrollContent: {},
+  welcomeBanner: {
+    paddingBottom: spacing.xs,
   },
-  Notification:{
-    width:50,
-    height:50,
-    borderRadius: 20,
-    backgroundColor: "lightgray",
-    justifyContent:"center",
-    alignItems:"center",
-    marginHorizontal:20
+  greetingText: {
+    opacity: 0.8,
   },
-  icon:{
-    fontSize:18,
-    
+  userNameText: {
+    marginTop: 2,
   },
-  greeting:{
-    fontSize:16,
-    color:"gray"
-  },
-  name:{
-    fontSize:25,
-    fontWeight: "bold",
-    color: "black",
-    marginTop: 5
-
-  }
-  ,
-  searchBar:{
-    height:50,
-    backgroundColor:"lightgray",
-    marginHorizontal:20,
-    marginTop: 20,
-    borderRadius: 12,
-    justifyContent:"center"
-    ,paddingHorizontal: 15,
-
-  }
-  ,
-  searchText:{
-    color:"gray",
-    fontSize: 13
-  },
-  banner:{
-    backgroundColor:"lavender",
-    margin:20,
-    borderRadius: 15,
-    padding: 20,
-  }
-  ,bannerTitle:{
-    fontSize:22,
-    fontWeight:"bold"
-  },
-  sectionTitle:{
-    fontSize:22,
-    fontWeight:"bold",
-    marginHorizontal:20
-  },
-  categoryContainer:{
+  categoryGrid: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 25
+    justifyContent: "space-between",
   },
-  category:{
-    backgroundColor:"lightgray",
-    padding:12,
-    borderRadius:10,
-    width:100,
-    textAlign:"center",
-    alignItems:"center"
+  categoryCard: {
+    flex: 1,
+    borderRadius: 16,
+    paddingVertical: spacing.lg,
+    alignItems: "center",
+    marginHorizontal: spacing.xs,
+    borderWidth: 1,
   },
-  card:{
-    backgroundColor:"whitesmoke",
-    marginHorizontal:20,
-    marginBottom: 20,
-    padding:20,
-    borderRadius:20
+  categoryIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: spacing.sm,
   },
-  cardTitle:{
-    fontSize:16,
-    marginTop:5,
-
+  categoryText: {},
+  premiumBanner: {},
+  premiumTitle: {},
+  premiumSubtitle: {
+    lineHeight: 18,
+    marginTop: 4,
   },
-  premium:{
-    backgroundColor:"#f2e54a80",
-    margin:20,
-    padding:20,
-    borderRadius:15,
-    marginBottom:40
+  premiumButton: {
+    paddingVertical: 12,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  premiumTitle:{
-    fontSize: 22,
-    fontWeight:"bold"
-  },
-  button:{
-    marginTop:20,
-    backgroundColor:"black",
-    padding: 15,
-    borderRadius: 10,
-    alignItems:"center"
-  },
-  buttonText:{
-    color:"whitesmoke"
-    ,fontSize: 18,
-    fontWeight:"bold"
-  }
+  premiumButtonText: {},
 });
