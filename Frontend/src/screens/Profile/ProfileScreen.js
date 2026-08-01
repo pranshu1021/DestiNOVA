@@ -873,3 +873,147 @@ export default function ProfileScreen(){
     )
 }
 
+const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    height: 56,
+    borderBottomWidth: 1,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {},
+  scrollContent: {},
+  avatarSection: {
+    alignItems: "center",
+    borderBottomWidth: 1,
+  },
+  avatar: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 2.5,
+    marginBottom: 8,
+  },
+  avatarPlaceholder: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2.5,
+    marginBottom: 8,
+  },
+  profileName: {},
+  profileEmail: {},
+  infoSection: {},
+  sectionHeader: {},
+  infoCard: {
+    borderRadius: 18,
+    borderWidth: 1,
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  infoLabel: {
+    flex: 1,
+  },
+  infoValue: {
+    textAlign: "right",
+    flex: 1.5,
+  },
+  wrapText: {
+    lineHeight: 18,
+  },
+  notAddedText: {},
+  divider: {
+    height: 1,
+  },
+  editBtn: {
+    height: 52,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  editBtnText: {
+    marginLeft: 8,
+  },
+  inputLabel: {},
+  inputContainer: {
+    borderWidth: 1.5,
+    height: 50,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  textInput: {
+    flex: 1,
+  },
+  genderOptions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  genderBtn: {
+    flex: 1,
+    height: 46,
+    borderWidth: 1.5,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  genderBtnText: {},
+  pickerCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderWidth: 1.5,
+    height: 50,
+    paddingHorizontal: 16,
+  },
+  pickerCardText: {},
+  suggestionsBox: {
+    borderWidth: 1,
+    marginTop: 4,
+    overflow: "hidden",
+  },
+  suggestionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+  },
+  suggestionItemText: {
+    marginLeft: 10,
+    flex: 1,
+  },
+  actionBtnRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  actionBtn: {
+    flex: 1,
+    height: 52,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 6,
+  },
+  cancelBtn: {
+    borderWidth: 1.5,
+  },
+  cancelBtnText: {},
+  saveBtn: {},
+  saveBtnText: {},
+});
