@@ -33,7 +33,7 @@ export default function AppNavigator(){
                 user?.profileCompleted ? (
                     <>
                         <Stack.Screen name="Home" component={Home}/>
-                        <Stack.Screen name="Profile" component={ProfileScreen}/>
+                        {/* <Stack.Screen name="Profile" component={ProfileScreen}/> */}
                     </>
                 ) : (
                     <>
