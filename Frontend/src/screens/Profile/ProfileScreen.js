@@ -701,7 +701,169 @@ export default function ProfileScreen(){
                                     )
                                 })}
                             </View>
-                            
+
+                             {/* DOB picker card */}
+                                  <Text style={[styles.inputLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold,                   color: colors.textSub, marginTop: spacing.lg, marginBottom: spacing.xs }]}>
+                                    Date of Birth
+                                  </Text>
+                                  <TouchableOpacity
+                                    activeOpacity={0.8}
+                  style={[styles.pickerCard, { backgroundColor: colors.card, borderColor: colors.border, borderRadius:                   borderRadius.md }]}
+                                    onPress={() => setShowDatePicker(true)}
+                >
+                                    <Text style={[styles.pickerCardText, { fontSize: typography.sizes.body, color: colors.textMain,                   fontWeight: typography.weights.medium }]}>
+                                      {dateOfBirth.toLocaleDateString("en-IN", {
+                                        day: "numeric",
+                                        month: "long",
+                                        year: "numeric",
+                                      })}
+                                    </Text>
+                                    <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+                                  </TouchableOpacity>
+
+                                  {showDatePicker && (
+                                    <DateTimePicker
+                                      value={dateOfBirth}
+                                      mode="date"
+                                      display="default"
+                                      maximumDate={new Date()}
+                                      onChange={handleDateChange}
+                                    />
+                                  )}
+
+                        {/* Time picker card */}
+                <Text style={[styles.inputLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textSub, marginTop: spacing.lg, marginBottom: spacing.xs }]}>
+                  Time of Birth
+                </Text>
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={[styles.pickerCard, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: borderRadius.md }]}
+                  onPress={() => setShowTimePicker(true)}
+                >
+                  <Text style={[styles.pickerCardText, { fontSize: typography.sizes.body, color: colors.textMain, fontWeight: typography.weights.medium }]}>
+                    {birthTime}
+                  </Text>
+                  <Ionicons name="time-outline" size={20} color={colors.primary} />
+                </TouchableOpacity>
+
+                {showTimePicker && (
+                  <DateTimePicker
+                    value={new Date()}
+                    mode="time"
+                    display="default"
+                    onChange={handleTimeChange}
+                  />
+                )}
+
+                     {/* Autocomplete Birth Place */}
+                <Text style={[styles.inputLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textSub, marginTop: spacing.lg, marginBottom: spacing.xs }]}>
+                  Birth Place
+                </Text>
+                <View
+                  style={[
+                    styles.inputContainer,
+                    { backgroundColor: colors.card, borderColor: colors.border, borderRadius: borderRadius.md },
+                    searchFocused && { borderColor: colors.primary },
+                  ]}
+                >
+                  <TextInput
+                    style={[styles.textInput, { fontSize: typography.sizes.body, color: colors.textMain }]}
+                    value={birthPlace}
+                    onChangeText={handlePlaceSearch}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
+                    placeholder="Search city..."
+                    placeholderTextColor={colors.textMuted}
+                  />
+                  {loadingPlaces && <ActivityIndicator size="small" color={colors.primary} />}
+                </View>
+
+                {places.length > 0 && (
+                  <View style={[styles.suggestionsBox, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: borderRadius.md }]}>
+                    {places.map((place) => (
+                      <TouchableOpacity
+                        key={place.place_id}
+                        style={[styles.suggestionItem, { borderBottomColor: colors.border }]}
+                        activeOpacity={0.7}
+                        onPress={() => handleSelectPlace(place)}
+                      >
+                        <Ionicons name="location-outline" size={18} color={colors.primary} />
+                        <Text numberOfLines={1} style={[styles.suggestionItemText, { fontSize: typography.sizes.body, color: colors.textMain }]}>
+                          {place.display_name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+
+                {/* Autocomplete Birth Place */}
+                <Text style={[styles.inputLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textSub, marginTop: spacing.lg, marginBottom: spacing.xs }]}>
+                  Birth Place
+                </Text>
+                <View
+                  style={[
+                    styles.inputContainer,
+                    { backgroundColor: colors.card, borderColor: colors.border, borderRadius: borderRadius.md },
+                    searchFocused && { borderColor: colors.primary },
+                  ]}
+                >
+                  <TextInput
+                    style={[styles.textInput, { fontSize: typography.sizes.body, color: colors.textMain }]}
+                    value={birthPlace}
+                    onChangeText={handlePlaceSearch}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
+                    placeholder="Search city..."
+                    placeholderTextColor={colors.textMuted}
+                  />
+                  {loadingPlaces && <ActivityIndicator size="small" color={colors.primary} />}
+                </View>
+
+                {places.length > 0 && (
+                  <View style={[styles.suggestionsBox, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: borderRadius.md }]}>
+                    {places.map((place) => (
+                      <TouchableOpacity
+                        key={place.place_id}
+                        style={[styles.suggestionItem, { borderBottomColor: colors.border }]}
+                        activeOpacity={0.7}
+                        onPress={() => handleSelectPlace(place)}
+                      >
+                        <Ionicons name="location-outline" size={18} color={colors.primary} />
+                        <Text numberOfLines={1} style={[styles.suggestionItemText, { fontSize: typography.sizes.body, color: colors.textMain }]}>
+                          {place.display_name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+                       {/* Action Buttons */}
+                <View style={[styles.actionBtnRow, { marginTop: spacing.giant }]}>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={[styles.actionBtn, styles.cancelBtn, { borderColor: colors.border, backgroundColor: colors.card, borderRadius: borderRadius.md }]}
+                    onPress={handleCancel}
+                    disabled={loading}
+                  >
+                    <Text style={[styles.cancelBtnText, { color: colors.textSub, fontSize: typography.sizes.large, fontWeight: typography.weights.bold }]}>
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={[styles.actionBtn, styles.saveBtn, { backgroundColor: colors.primary, borderRadius: borderRadius.md, ...shadows.primaryGlow }]}
+                    onPress={handleSave}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <ActivityIndicator size="small" color={colors.white} />
+                    ) : (
+                      <Text style={[styles.saveBtnText, { color: colors.white, fontSize: typography.sizes.large, fontWeight: typography.weights.bold }]}>
+                        Save
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
                         </View>
                     )}
 
@@ -709,7 +871,5 @@ export default function ProfileScreen(){
             </SafeAreaView>
         </CosmicBackground>
     )
-
-
 }
 
