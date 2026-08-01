@@ -15,12 +15,12 @@ import Animated, {
     useSharedValue,
     useAnimatedStyle,
     withTiming,
-    runOsJS,
+    runOnJS,
 } from "react-native-reanimated";
 
 import { Ionicons } from "@expo/vector-icons";
 import { ThemeContext } from "../context/ThemeContext";
-import { runOnJS } from "react-native-worklets";
+
 
 const {width:SCREEN_WIDTH} = Dimensions.get("window");
 const DRAWER_WIDTH = SCREEN_WIDTH * 0.78; // yha 78 percent screen width cover krre hai
@@ -30,6 +30,7 @@ export default function AstroDrawer({
     onClose,
     user,
     onViewProfile,
+    onPremium,
     onHoroscope,
     onKundli,
     onAIChat,
@@ -80,7 +81,7 @@ export default function AstroDrawer({
         };
     });
 
-    const animatedOverlayStyle = useAnimationStyle(()=>{
+    const animatedOverlayStyle = useAnimatedStyle(()=>{
         return {
             opacity: opacityAnim.value,
         };
@@ -307,7 +308,7 @@ const styles = StyleSheet.create({
     },
     avatarPlaceholder:{
         width:60,
-        heigh:60,
+        height:60,
         borderRadius:30,
         justifyContent:"center",
         alignItems:"center",
@@ -374,14 +375,14 @@ const styles = StyleSheet.create({
     themeRow: {
         flexDirection: "row",
         padding:3,
-        justifyContent:"spacing-between",
+        justifyContent:"space-between",
 
     },
     themeBtn:{
         flex:1,
         paddingVertical: 8,
         justifyContent: "center",
-        alignItems:" center",
+        alignItems:"center",
 
     },
     themeBtnText:{

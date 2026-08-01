@@ -59,33 +59,35 @@ export default function HomeScreen() {
   const topAstrologers = [
     {
       id: "1",
-      name: "Astro Ramesh",
+      name: "Astro Pranshu",
       specialty: "Vedic Astrology, Kundli",
-      experience: 12,
+      experience: 1002,
       rating: 4.8,
       price: 25,
       isOnline: true,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300&auto=format&fit=crop",
+      image: "https://imgs.search.brave.com/fxX6_2cmiEfUFyDh7w2G-6PzVulrvJ3IpduN8aUxfYA/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzE2LzI0/LzU2LzE2MjQ1Njhj/Mjk4N2JjMDQ5ZmU0/OGQ0M2I4ZTFiNzBk/LmpwZw",
     },
     {
       id: "2",
-      name: "Tarot Mamta",
+      name: "Tarot Mehak",
       specialty: "Tarot Cards, Face Reading",
       experience: 8,
       rating: 4.9,
       price: 30,
       isOnline: true,
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=300&auto=format&fit=crop",
+      image: "https://imgs.search.brave.com/T-mIQpORRwTzNXTE9EjKZh4MCfBOG2tSIJHOl8CE78E/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzAyL2Zm/LzkwLzAyZmY5MGU0/NTAzOTljOWM3ZDU2/MGIxNTBmOGNhYjY2/LmpwZw",
+      
     },
     {
       id: "3",
-      name: "Guru Dutt",
+      name: "Guru Pradeep",
       specialty: "Palmistry, Numerology",
       experience: 15,
-      rating: 4.7,
+      rating: 4.9,
       price: 40,
       isOnline: false,
-      image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300&auto=format&fit=crop",
+      image: "https://imgs.search.brave.com/zPM7Fcttfro2-VcwS1hDh4Ew3K7A7pI_k6XH_QRXxno/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvdGh1bWJu/YWlsL3NoaW4tY2hh/bi10aWt0b2stcGZw/LWlkZWFzLW1kdGRk/bmpqanJ0OWY1ZTcu/d2VicA"
+      
     },
   ];
 
@@ -217,7 +219,7 @@ export default function HomeScreen() {
           </HomeSection>
         </ScrollView>
 
-        {/* Astro Drawer */}
+        
         <AstroDrawer
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}

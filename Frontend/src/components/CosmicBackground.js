@@ -21,7 +21,7 @@ export default function CosmicBackground({children}){
                 width: SCREEN_WIDTH * 0.8,
                 height: SCREEN_WIDTH * 0.8,
                 borderRadius: SCREEN_WIDTH * 0.4,
-                backgroundColor: isDark? "rgb(115, 28, 126,0.8)" : "rgba(221, 214, 254, 0.28)"
+                backgroundColor: isDark? "rgba(124, 58, 237, 0.06)" : "rgba(221, 214, 254, 0.28)"
             }
 
             ]}
