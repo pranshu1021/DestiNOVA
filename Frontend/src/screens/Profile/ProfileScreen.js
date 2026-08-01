@@ -18,7 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { AuthContext } from "../../context/AuthContext";
-import { ThemeContext } from "@react-navigation/native";
+import { ThemeContext } from "../../context/ThemeContext";
 import CosmicBackground from "../../components/CosmicBackground";
 import { searchPlaces } from "../../services/locationIQ";
 
