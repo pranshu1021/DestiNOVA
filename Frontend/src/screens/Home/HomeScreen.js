@@ -224,7 +224,7 @@ export default function HomeScreen() {
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
           user={user}
-          onViewProfile={() => navigation.navigate("Home")}
+          onViewProfile={() => navigation.navigate("Profile")}
           onPremium={() => handleFeatureAlert("Premium")}
           onHoroscope={() => handleFeatureAlert("Horoscope")}
           onKundli={() => handleFeatureAlert("Kundli Matching")}
