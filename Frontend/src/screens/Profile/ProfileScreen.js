@@ -589,7 +589,7 @@ export default function ProfileScreen(){
                             <Text style ={[styles.inputLabel,
                                 {fontSize:typography.sizes.body,
                                     fontWeight:typography.weights.semiBold,
-                                    color: color.textSub,
+                                    color: colors.textSub,
                                     marginTop: spacing.lg,
                                     marginBottom:spacing.xs
                                 }
@@ -620,7 +620,7 @@ export default function ProfileScreen(){
                             <Text style ={[styles.inputLabel,
                                 {fontSize:typography.sizes.body,
                                     fontWeight:typography.weights.semiBold,
-                                    color: color.textSub,
+                                    color: colors.textSub,
                                     marginTop: spacing.lg,
                                     marginBottom:spacing.xs
                                 }
@@ -652,7 +652,7 @@ export default function ProfileScreen(){
                             <Text style ={[styles.inputLabel,
                                 {fontSize:typography.sizes.body,
                                     fontWeight:typography.weights.semiBold,
-                                    color: color.textSub,
+                                    color: colors.textSub,
                                     marginTop: spacing.lg,
                                     marginBottom:spacing.xs
                                 }
