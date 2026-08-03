@@ -231,6 +231,7 @@ export default function HomeScreen() {
           onAIChat={() => handleFeatureAlert("AI Chat")}
           onNotifications={() => handleFeatureAlert("Notifications")}
           onHelp={() => handleFeatureAlert("Help Center")}
+          onAstroSignup={() => navigation.navigate("AstroSignup")}
           onLogout={logout}
         />
       </SafeAreaView>

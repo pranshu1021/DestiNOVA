@@ -308,6 +308,7 @@ export default function ProfileScreen() {
                     </>
                   ) : null}
                 </View>
+                
 
                 <TouchableOpacity
                   activeOpacity={0.8}

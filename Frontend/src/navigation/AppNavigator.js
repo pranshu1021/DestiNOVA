@@ -18,6 +18,7 @@ import DateOfBirth from "../screens/Screenspages/DateOfBirthPage"
 import BirthTime from "../screens/Screenspages/BirthTimePage";
 import PlaceOfBirth from "../screens/Screenspages/BirthPlacePage"
 import ProfileScreen from "../screens/Profile/ProfileScreen";
+import AstroSignup from "../screens/AstrologerScreen/AstroSignup"
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator(){
@@ -34,6 +35,7 @@ export default function AppNavigator(){
                     <>
                         <Stack.Screen name="Home" component={Home}/>
                         <Stack.Screen name="Profile" component={ProfileScreen}/>
+                         <Stack.Screen name="AstroSignup" component={AstroSignup}/>
                     </>
                 ) : (
                     <>
@@ -45,6 +47,7 @@ export default function AppNavigator(){
                        
                         <Stack.Screen name="Home" component={Home}/>
                         <Stack.Screen name="Profile" component={ProfileScreen}/>
+                        <Stack.Screen name="AstroSignup" component={AstroSignup}/>
                     </>
                 )
             ) : (

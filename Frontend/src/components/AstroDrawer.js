@@ -37,6 +37,7 @@ export default function AstroDrawer({
     onNotifications,
     onHelp,
     onLogout,
+    onAstroSignup,
 }) {
     const {colors, spacing, typography, borderRadius, themeMode, setThemeMode} = useContext(ThemeContext);
 
@@ -97,6 +98,8 @@ export default function AstroDrawer({
         {label: "AI Astrology Chat", icon: "chatbubble-outline", onPress: onAIChat},
         {label: "Notifications", icon: "notifications-outline", onPress: onNotifications},
         {label: "Help & Support", icon: "help-circle-outline", onPress: onHelp},
+        {label:"Become An Astrologer" , icon:"sparkles-outline",onPress:onAstroSignup},
+   
     ];
 
     return(
