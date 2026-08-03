@@ -20,6 +20,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { ThemeContext } from "../../context/ThemeContext";
 import { searchPlaces } from "../../services/locationIQ";
 import CosmicBackground from "../../components/CosmicBackground";
+import CosmicBottomBar from "../../components/CosmicBottomBar";
 import api from "../../services/api";
 
 export default function ProfileScreen() {
@@ -27,36 +28,31 @@ export default function ProfileScreen() {
   const { user, updateUser } = useContext(AuthContext);
   const { colors, spacing, typography, borderRadius, shadows, isDark } = useContext(ThemeContext);
 
-  // Mode state
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Form states (copy of user details)
   const [fullName, setFullName] = useState(user?.fullName || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [gender, setGender] = useState(user?.gender || "");
-  
-  // Date and Time picker states
+
   const [dateOfBirth, setDateOfBirth] = useState(
     user?.dateOfBirth ? new Date(user.dateOfBirth) : new Date()
   );
   const [birthTime, setBirthTime] = useState(user?.birthTime || "12:00 PM");
-  
+
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
-  // Location suggestions states
   const [birthPlace, setBirthPlace] = useState(user?.birthPlace || "");
   const [latitude, setLatitude] = useState(user?.birthLatitude || null);
   const [longitude, setLongitude] = useState(user?.birthLongitude || null);
-  
+
   const [places, setPlaces] = useState([]);
   const [loadingPlaces, setLoadingPlaces] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
   const debounceRef = useRef(null);
 
-  // Debounced location search
   const handlePlaceSearch = (text) => {
     setBirthPlace(text);
     if (text.trim().length < 2) {
@@ -88,7 +84,6 @@ export default function ProfileScreen() {
     setPlaces([]);
   };
 
-  // Date picker handler
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(Platform.OS === "ios");
     if (selectedDate) {
@@ -96,7 +91,6 @@ export default function ProfileScreen() {
     }
   };
 
-  // Time picker handler
   const handleTimeChange = (event, selectedTime) => {
     setShowTimePicker(Platform.OS === "ios");
     if (selectedTime) {
@@ -118,7 +112,6 @@ export default function ProfileScreen() {
     });
   };
 
-  // Save changes
   const handleSave = async () => {
     if (!fullName.trim()) {
       Alert.alert("Required Field", "Name cannot be empty.");
@@ -127,13 +120,11 @@ export default function ProfileScreen() {
 
     try {
       setLoading(true);
-
-      // Build only fields that changed (partial update)
       const updateFields = {};
       if (fullName.trim() !== user?.fullName) updateFields.fullName = fullName.trim();
       if (phone.trim() !== user?.phone) updateFields.phone = phone.trim();
       if (gender !== user?.gender) updateFields.gender = gender;
-      
+
       const userDOB = user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString() : null;
       const selectDOB = dateOfBirth.toISOString();
       if (selectDOB !== userDOB) updateFields.dateOfBirth = selectDOB;
@@ -145,14 +136,13 @@ export default function ProfileScreen() {
         updateFields.birthLongitude = longitude;
       }
 
-      // Check if any fields actually changed
       if (Object.keys(updateFields).length === 0) {
         setIsEditing(false);
         setLoading(false);
         return;
       }
 
-      const response = await api.put("/update-profile", updateFields);
+      const response = await api.put("/auth/update-profile", updateFields);
 
       if (response.data.success) {
         await updateUser(response.data.user);
@@ -170,7 +160,6 @@ export default function ProfileScreen() {
   };
 
   const handleCancel = () => {
-    // Reset states back to user values
     setFullName(user?.fullName || "");
     setPhone(user?.phone || "");
     setGender(user?.gender || "");
@@ -198,10 +187,10 @@ export default function ProfileScreen() {
             onPress={() => navigation.goBack()}
             disabled={loading}
           >
-            <Ionicons name="arrow-back" size={24} color={colors.primary} />
+            <Ionicons name="arrow-back" size={22} color={colors.primary} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { fontSize: typography.sizes.h3, fontWeight: typography.weights.bold, color: colors.textMain }]}>
-            DestiNOVA Profile
+            Seeker Profile
           </Text>
           <View style={{ width: 40 }} />
         </View>
@@ -212,16 +201,16 @@ export default function ProfileScreen() {
         >
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={[styles.scrollContent, { paddingBottom: spacing.giant }]}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: 110 }]}
             keyboardShouldPersistTaps="handled"
           >
             {/* Avatar Area */}
-            <View style={[styles.avatarSection, { backgroundColor: colors.card, borderBottomColor: colors.border, paddingVertical: spacing.xxxl }]}>
+            <View style={[styles.avatarSection, { backgroundColor: colors.card, borderBottomColor: colors.border, paddingVertical: spacing.xxl }]}>
               {user?.photo ? (
                 <Image source={{ uri: user.photo }} style={[styles.avatar, { borderColor: colors.primary }]} />
               ) : (
                 <View style={[styles.avatarPlaceholder, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}>
-                  <Ionicons name="person" size={48} color={colors.primary} />
+                  <Ionicons name="person" size={44} color={colors.primary} />
                 </View>
               )}
               <Text style={[styles.profileName, { fontSize: typography.sizes.h2, fontWeight: typography.weights.bold, color: colors.textMain }]}>
@@ -236,10 +225,10 @@ export default function ProfileScreen() {
             {!isEditing ? (
               <View style={[styles.infoSection, { paddingHorizontal: spacing.xxl, paddingTop: spacing.lg }]}>
                 {/* Account Details */}
-                <Text style={[styles.sectionHeader, { fontSize: typography.sizes.large, fontWeight: typography.weights.bold, color: colors.primaryDark, marginTop: spacing.lg, marginBottom: spacing.sm }]}>
+                <Text style={[styles.sectionHeader, { fontSize: typography.sizes.large, fontWeight: typography.weights.bold, color: colors.primary, marginTop: spacing.lg, marginBottom: spacing.sm }]}>
                   Personal Details
                 </Text>
-                
+
                 <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border, paddingHorizontal: spacing.lg, ...shadows.soft }]}>
                   <View style={[styles.infoRow, { paddingVertical: spacing.lg }]}>
                     <Text style={[styles.infoLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.medium, color: colors.textSub }]}>Full Name</Text>
@@ -270,10 +259,10 @@ export default function ProfileScreen() {
                 </View>
 
                 {/* Astrology details */}
-                <Text style={[styles.sectionHeader, { fontSize: typography.sizes.large, fontWeight: typography.weights.bold, color: colors.primaryDark, marginTop: spacing.lg, marginBottom: spacing.sm }]}>
-                  Birth Details
+                <Text style={[styles.sectionHeader, { fontSize: typography.sizes.large, fontWeight: typography.weights.bold, color: colors.primary, marginTop: spacing.lg, marginBottom: spacing.sm }]}>
+                  Vedic Birth Details
                 </Text>
-                
+
                 <View style={[styles.infoCard, { backgroundColor: colors.card, borderColor: colors.border, paddingHorizontal: spacing.lg, ...shadows.soft }]}>
                   <View style={[styles.infoRow, { paddingVertical: spacing.lg }]}>
                     <Text style={[styles.infoLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.medium, color: colors.textSub }]}>Gender</Text>
@@ -296,22 +285,11 @@ export default function ProfileScreen() {
                       {user?.birthPlace || "Not Added"}
                     </Text>
                   </View>
-                  {(user?.birthLatitude && user?.birthLongitude) ? (
-                    <>
-                      <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                      <View style={[styles.infoRow, { paddingVertical: spacing.lg }]}>
-                        <Text style={[styles.infoLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.medium, color: colors.textSub }]}>Coordinates</Text>
-                        <Text style={[styles.infoValue, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textMain }]}>
-                          {user.birthLatitude.toFixed(4)}°N, {user.birthLongitude.toFixed(4)}°E
-                        </Text>
-                      </View>
-                    </>
-                  ) : null}
                 </View>
 
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  style={[styles.editBtn, { backgroundColor: colors.primary, marginTop: spacing.giant, borderRadius: borderRadius.md, ...shadows.primaryGlow }]}
+                  style={[styles.editBtn, { backgroundColor: colors.primary, marginTop: spacing.xl, borderRadius: borderRadius.lg, ...shadows.primaryGlow }]}
                   onPress={handleStartEdit}
                 >
                   <Ionicons name="create-outline" size={20} color={colors.white} />
@@ -323,11 +301,10 @@ export default function ProfileScreen() {
             ) : (
               /* EDIT MODE CONTAINER */
               <View style={[styles.infoSection, { paddingHorizontal: spacing.xxl, paddingTop: spacing.lg }]}>
-                <Text style={[styles.sectionHeader, { fontSize: typography.sizes.large, fontWeight: typography.weights.bold, color: colors.primaryDark, marginTop: spacing.lg, marginBottom: spacing.sm }]}>
+                <Text style={[styles.sectionHeader, { fontSize: typography.sizes.large, fontWeight: typography.weights.bold, color: colors.primary, marginTop: spacing.lg, marginBottom: spacing.sm }]}>
                   Edit Details
                 </Text>
 
-                {/* Name input */}
                 <Text style={[styles.inputLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textSub, marginTop: spacing.lg, marginBottom: spacing.xs }]}>
                   Full Name
                 </Text>
@@ -341,7 +318,6 @@ export default function ProfileScreen() {
                   />
                 </View>
 
-                {/* Phone input */}
                 <Text style={[styles.inputLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textSub, marginTop: spacing.lg, marginBottom: spacing.xs }]}>
                   Phone Number
                 </Text>
@@ -356,7 +332,6 @@ export default function ProfileScreen() {
                   />
                 </View>
 
-                {/* Gender selector */}
                 <Text style={[styles.inputLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textSub, marginTop: spacing.lg, marginBottom: spacing.xs }]}>
                   Gender
                 </Text>
@@ -388,7 +363,6 @@ export default function ProfileScreen() {
                   })}
                 </View>
 
-                {/* DOB picker card */}
                 <Text style={[styles.inputLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textSub, marginTop: spacing.lg, marginBottom: spacing.xs }]}>
                   Date of Birth
                 </Text>
@@ -417,7 +391,6 @@ export default function ProfileScreen() {
                   />
                 )}
 
-                {/* Time picker card */}
                 <Text style={[styles.inputLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textSub, marginTop: spacing.lg, marginBottom: spacing.xs }]}>
                   Time of Birth
                 </Text>
@@ -441,7 +414,6 @@ export default function ProfileScreen() {
                   />
                 )}
 
-                {/* Autocomplete Birth Place */}
                 <Text style={[styles.inputLabel, { fontSize: typography.sizes.body, fontWeight: typography.weights.semiBold, color: colors.textSub, marginTop: spacing.lg, marginBottom: spacing.xs }]}>
                   Birth Place
                 </Text>
@@ -482,8 +454,7 @@ export default function ProfileScreen() {
                   </View>
                 )}
 
-                {/* Action Buttons */}
-                <View style={[styles.actionBtnRow, { marginTop: spacing.giant }]}>
+                <View style={[styles.actionBtnRow, { marginTop: spacing.xl }]}>
                   <TouchableOpacity
                     activeOpacity={0.8}
                     style={[styles.actionBtn, styles.cancelBtn, { borderColor: colors.border, backgroundColor: colors.card, borderRadius: borderRadius.md }]}
@@ -514,15 +485,15 @@ export default function ProfileScreen() {
             )}
           </ScrollView>
         </KeyboardAvoidingView>
+
+        <CosmicBottomBar currentRoute="Profile" />
       </SafeAreaView>
     </CosmicBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  safeContainer: {
-    flex: 1,
-  },
+  safeContainer: { flex: 1 },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -532,9 +503,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -545,16 +516,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     borderWidth: 2.5,
     marginBottom: 8,
   },
   avatarPlaceholder: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2.5,
@@ -573,48 +544,32 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  infoLabel: {
-    flex: 1,
-  },
-  infoValue: {
-    textAlign: "right",
-    flex: 1.5,
-  },
-  wrapText: {
-    lineHeight: 18,
-  },
+  infoLabel: { flex: 1 },
+  infoValue: { textAlign: "right", flex: 1.5 },
+  wrapText: { lineHeight: 18 },
   notAddedText: {},
-  divider: {
-    height: 1,
-  },
+  divider: { height: 1 },
   editBtn: {
     height: 52,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
   },
-  editBtnText: {
-    marginLeft: 8,
-  },
+  editBtnText: { marginLeft: 8 },
   inputLabel: {},
   inputContainer: {
-    borderWidth: 1.5,
-    height: 50,
-    paddingHorizontal: 16,
+    borderWidth: 1,
+    height: 48,
+    paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
   },
-  textInput: {
-    flex: 1,
-  },
-  genderOptions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
+  textInput: { flex: 1 },
+  genderOptions: { flexDirection: "row", justifyContent: "space-between" },
   genderBtn: {
     flex: 1,
-    height: 46,
-    borderWidth: 1.5,
+    height: 44,
+    borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 4,
@@ -624,16 +579,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderWidth: 1.5,
-    height: 50,
-    paddingHorizontal: 16,
+    borderWidth: 1,
+    height: 48,
+    paddingHorizontal: 14,
   },
   pickerCardText: {},
-  suggestionsBox: {
-    borderWidth: 1,
-    marginTop: 4,
-    overflow: "hidden",
-  },
+  suggestionsBox: { borderWidth: 1, marginTop: 4, overflow: "hidden" },
   suggestionItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -641,24 +592,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomWidth: 1,
   },
-  suggestionItemText: {
-    marginLeft: 10,
-    flex: 1,
-  },
-  actionBtnRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
+  suggestionItemText: { marginLeft: 10, flex: 1 },
+  actionBtnRow: { flexDirection: "row", justifyContent: "space-between" },
   actionBtn: {
     flex: 1,
-    height: 52,
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 6,
   },
-  cancelBtn: {
-    borderWidth: 1.5,
-  },
+  cancelBtn: { borderWidth: 1 },
   cancelBtnText: {},
   saveBtn: {},
   saveBtnText: {},

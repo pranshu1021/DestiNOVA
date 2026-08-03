@@ -1,413 +1,238 @@
-import React, { useState} from "react";
+import React, { useContext, useState } from "react";
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    ScrollView,
-    StyleSheet,
-    Alert,
-    Image
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import api from "../../services/api"
-import {useContext} from "react";
-import {AuthContext} from "../../context/AuthContext"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import {useEffect} from "react";
-import { GOOGLE_ANDROID_CLIENT_ID, GOOGLE_WEB_CLIENT_ID } from "../../config/googleAuth"; //google client ID
-// import * as Google from "expo-auth-session/providers/google"; // this is for auth...
-// import * as WebBrowser from "expo-web-browser"; //browser ko automatically close karte h iski help se
-import { GoogleSignin,statusCodes } from "@react-native-google-signin/google-signin";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import api from "../../services/api";
+import { AuthContext } from "../../context/AuthContext";
+import { ThemeContext } from "../../context/ThemeContext";
+import CosmicBackground from "../../components/CosmicBackground";
 
-// iska use browser ko close krne ke liye 
-// aur sirf ek baar app load hone par chalega
-// WebBrowser.maybeCompleteAuthSession();
-export default function LoginScreen(){
-    const navigation = useNavigation();
-// states idhar rahengi
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
-    const {login} = useContext(AuthContext);
+export default function LoginScreen() {
+  const navigation = useNavigation();
+  const { login } = useContext(AuthContext);
+  const { colors, spacing, typography, borderRadius, shadows } = useContext(ThemeContext);
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
- 
-
-    const handleLogin = async()=>{
-        if(!email || !password){
-            Alert.alert(
-                "Error",
-                "Please fill all fields"
-            );
-            return;
-        }
-        try{
-            const response=await api.post("/login",{
-              email,
-              password
-            })
-            
-            await AsyncStorage.setItem("provider","email");
-
-            await login(
-              response.data.token,
-              response.data.user
-            )
-            Alert.alert(
-              "Success",
-              "Login Successful"
-            );
-            const user = await AsyncStorage.getItem("user");
-           
-           
-           if(user){
-            const parsedUser = JSON.parse(user);
-            console.log(parsedUser.fullName);
-           }
-
-            const token = await AsyncStorage.getItem("token");
-            console.log("Saved token");
-            console.log(token);
-            
-            
-
-
-
-        }
-        catch(error){
-            if (error.response){
-                Alert.alert(
-                    "Login Failed.",
-                 error.response.data.message
-                )
-            }
-            else{
-                Alert.alert(
-                    "Network Error.",
-                    "Could not connect to network.."
-                )
-            }
-        }
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Input Required", "Please enter both email and password.");
+      return;
     }
-
-       const handleGoogleLogin= async() =>{
-       
-        try {
-           console.log("Step 1");
-
-    await GoogleSignin.hasPlayServices();
-
-    console.log("Step 2");
-
-    const userInfo = await GoogleSignin.signIn();
-
-    console.log("Google Success");
-    console.log(userInfo);
-
-    console.log("Step 3");
-
-    const response = await api.post("/google", {
-      idToken: userInfo.data.idToken,
-    });
-
-    console.log("Backend Response");
-    console.log(response.data);
-
-    console.log("Step 4");
-
-    await AsyncStorage.setItem("provider", "google");
-
-    await login(
-      response.data.token,
-      response.data.user
-    );
-
-    console.log("Step 5");
-
-    Alert.alert("Success", "Google Login Success");
-
-  } catch (error) {
-    console.log("FULL ERROR");
-    console.log(error);
-
-    if (error.response) {
-      console.log(error.response.data);
+    try {
+      setLoading(true);
+      const response = await api.post("/auth/login", { email, password });
+      await AsyncStorage.setItem("provider", "email");
+      await login(response.data.token, response.data.user);
+    } catch (error) {
+      Alert.alert(
+        "Login Failed",
+        error.response?.data?.message || "Could not connect to authentication server."
+      );
+    } finally {
+      setLoading(false);
     }
-  }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setGoogleLoading(true);
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const response = await api.post("/auth/google", {
+        idToken: userInfo.data.idToken,
+      });
+
+      await AsyncStorage.setItem("provider", "google");
+      await login(response.data.token, response.data.user);
+    } catch (error) {
+      console.log("Google Login error:", error);
+      Alert.alert("Google Login Failed", error.response?.data?.message || "Google authentication was cancelled.");
+    } finally {
+      setGoogleLoading(false);
     }
-   
-       
-    return(
-        <SafeAreaView style={styles.loginContainer}>
-            <ScrollView contentContainerStyle={styles.scroll}
-               showsVerticalScrollIndicator={false}>
-<View style={styles.card}>
-            <View >
-                <Text style={styles.loginTitle}>
-                    👾
-                </Text>
+  };
 
-                <Text style={styles.loginSubtitle}> DestiNOVA</Text>
-            </View>
-            <Text style={styles.LoginContent}>Continue your spiritual journey with us.</Text>
-            <Text style={styles.label}>Email</Text>
-            <TextInput style={styles.loginInput}
-             placeholder="Enter your Email"
-             placeholderTextColor="#6B7280"
-             keyboardType="email-address"
-             autoCapitalize="none"
-             value={email}
-             onChangeText = {setEmail}
-            />
-<Text style={styles.label}>Password</Text>
-            <View style={styles.passwordContainer}>
-
-            <TextInput style={styles.loginPassword}
-            placeholder="Enter your Password"
-            placeholderTextColor="#6B7280"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-            />
-
-            <TouchableOpacity onPress={()=>setShowPassword(!showPassword)}>
-                <Text style={styles.showPasswordIcon}>
-                    {showPassword ? "🙈" : "🙉"}
-                </Text>
-            </TouchableOpacity>
-            </View>
-
-            {/* forgot password */}
-
-        <TouchableOpacity style={{alignSelf:"flex-end"}}>
-            <Text style={styles.loginText}>Forgot Password?</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity activeOpacity={0.8} onPress={handleLogin}>
-            <Text style={styles.loginButton}>Login</Text>
-        </TouchableOpacity>
-
-        <View style={styles.loginAlreadyAccount}>
-            <Text style={styles.loginText}>Don't have an account?</Text>
-            <TouchableOpacity onPress={()=> navigation.navigate("Signup")}>
-                <Text style={styles.signupText}>
-                    Sign Up
-                </Text>
-            </TouchableOpacity>
-        </View>
-
-
-
-          <View style={{flexDirection:"row"
-            ,alignItems:"center",
-            marginVertical:20
-          }}>
-            <View
-              style={{flex:1,
-                height:1,
-                backgroundColor:"black",
-              }}
-              />
-                
-              <Text>
-                OR
+  return (
+    <CosmicBackground>
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={[styles.scrollContent, { paddingHorizontal: spacing.xxl, paddingVertical: spacing.xxl }]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Glass Card */}
+          <View
+            style={[
+              styles.card,
+              {
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+                borderRadius: borderRadius.xl || 28,
+                ...shadows.medium,
+              },
+            ]}
+          >
+            {/* Logo Header */}
+            <View style={styles.logoSection}>
+              <View style={[styles.sparkleBadge, { backgroundColor: colors.primaryLight }]}>
+                <Ionicons name="sparkles" size={28} color={colors.primary} />
+              </View>
+              <Text style={[styles.title, { color: colors.textMain, fontSize: typography.sizes.h1, fontWeight: typography.weights.bold }]}>
+                DestiNOVA
               </Text>
+              <Text style={[styles.subtitle, { color: colors.textSub, fontSize: typography.sizes.body }]}>
+                Enter the cosmic realm of spiritual guidance
+              </Text>
+            </View>
 
-              <View style={{flex:1,
-                height:1,
-                backgroundColor:"black"
-              }} />
-              
+            {/* Email Field */}
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.textSub, fontSize: typography.sizes.small }]}>EMAIL ADDRESS</Text>
+              <View style={[styles.inputWrapper, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: borderRadius.lg }]}>
+                <Ionicons name="mail-outline" size={20} color={colors.primary} style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, { color: colors.textMain }]}
+                  placeholder="name@example.com"
+                  placeholderTextColor={colors.textMuted}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={email}
+                  onChangeText={setEmail}
+                />
+              </View>
+            </View>
+
+            {/* Password Field */}
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: colors.textSub, fontSize: typography.sizes.small }]}>PASSWORD</Text>
+              <View style={[styles.inputWrapper, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: borderRadius.lg }]}>
+                <Ionicons name="lock-closed-outline" size={20} color={colors.primary} style={styles.inputIcon} />
+                <TextInput
+                  style={[styles.input, { color: colors.textMain }]}
+                  placeholder="Enter your password"
+                  placeholderTextColor={colors.textMuted}
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
+                  <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color={colors.textSub} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Submit Button */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handleLogin}
+              disabled={loading}
+              style={[
+                styles.primaryBtn,
+                { backgroundColor: colors.primary, borderRadius: borderRadius.lg, ...shadows.primaryGlow },
+              ]}
+            >
+              {loading ? (
+                <ActivityIndicator color={colors.white} size="small" />
+              ) : (
+                <Text style={[styles.primaryBtnText, { color: colors.white, fontSize: typography.sizes.body, fontWeight: typography.weights.bold }]}>
+                  Sign In to DestiNOVA
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Register Footer Link */}
+            <View style={styles.footerRow}>
+              <Text style={[styles.footerText, { color: colors.textSub, fontSize: typography.sizes.body }]}>
+                New seeker?
+              </Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+                <Text style={[styles.linkText, { color: colors.primary, fontSize: typography.sizes.body, fontWeight: typography.weights.bold }]}>
+                  {" Create Account"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Divider */}
+            <View style={styles.dividerRow}>
+              <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+              <Text style={[styles.dividerText, { color: colors.textMuted, fontSize: typography.sizes.caption }]}>OR CONNECT WITH</Text>
+              <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+            </View>
+
+            {/* Google Sign In Button */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handleGoogleLogin}
+              disabled={googleLoading}
+              style={[
+                styles.googleBtn,
+                { backgroundColor: colors.cardSolid, borderColor: colors.border, borderRadius: borderRadius.lg, ...shadows.soft },
+              ]}
+            >
+              {googleLoading ? (
+                <ActivityIndicator color={colors.primary} size="small" />
+              ) : (
+                <>
+                  <Image
+                    style={styles.googleIcon}
+                    source={{
+                      uri: "https://yt3.googleusercontent.com/yqq5boPOuTo3s85oxX-DJjIhkeVN187TIEvYpCekcvuPMA9HepfOQpbWUN5w6Sn8gxlBZzPG=s900-c-k-c0x00ffffff-no-rj",
+                    }}
+                  />
+                  <Text style={[styles.googleBtnText, { color: colors.textMain, fontSize: typography.sizes.body, fontWeight: typography.weights.bold }]}>
+                    Continue with Google
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity onPress={handleGoogleLogin} style={{
-            backgroundColor:"white",
-           
-            elevation:5,
-            paddingVertical:14,
-            borderRadius:10,
-            flexDirection:"row",
-            justifyContent:"center",
-            alignItems:"center",
-          }}>
-              <Image
-        style={{
-          width:24,
-          height:24,
-          marginRight:10,
-        }}
-        source={{
-          uri:'https://yt3.googleusercontent.com/yqq5boPOuTo3s85oxX-DJjIhkeVN187TIEvYpCekcvuPMA9HepfOQpbWUN5w6Sn8gxlBZzPG=s900-c-k-c0x00ffffff-no-rj'
-        }}
-      />
-
-            <Text>
-              Continue with Google
-            </Text>
-          </TouchableOpacity>
-          
-        </View>
-            </ScrollView>
-        </SafeAreaView>
-        
-    )
+        </ScrollView>
+      </SafeAreaView>
+    </CosmicBackground>
+  );
 }
 
 const styles = StyleSheet.create({
-    label: {
-  marginBottom: 8,
-  marginLeft: 5,
-  color: "#374151",
-  fontWeight: "600",
-},
-  loginContainer: {
-    flex: 1,
-    backgroundColor: "#EEF2FF",
-  },
-
-  scroll: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 25,
-    paddingVertical: 40,
-  },
-
-  loginTitle: {
-    fontSize: 70,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-
-  loginSubtitle: {
-    fontSize: 34,
-    fontWeight: "800",
-    textAlign: "center",
-    color: "#4F46E5",
-    letterSpacing: 1,
-  },
-
-  LoginContent: {
-    textAlign: "center",
-    color: "#6B7280",
-    fontSize: 17,
-    marginTop: 12,
-    marginBottom: 35,
-    lineHeight: 24,
-  },
-
-  loginInput: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    paddingHorizontal: 18,
-    paddingVertical: 16,
-    fontSize: 16,
-    color: "#111827",
-
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-
-    marginBottom: 18,
-
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-  },
-
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-
-    paddingHorizontal: 15,
-
-    marginBottom: 18,
-
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-  },
-
-  loginPassword: {
-    flex: 1,
-    paddingVertical: 16,
-    fontSize: 16,
-    color: "#111827",
-  },
-
-  showPasswordIcon: {
-    fontSize: 24,
-    marginLeft: 10,
-  },
-
-  loginText: {
-    color: "#4F46E5",
-    fontWeight: "600",
-    fontSize: 15,
-    textAlign: "center",
-  },
-
-  loginButton: {
-    backgroundColor: "#4F46E5",
-    paddingVertical: 17,
-    borderRadius: 18,
-    marginTop: 18,
-
-    textAlign: "center",
-    color: "white",
-
-    fontSize: 18,
-    fontWeight: "700",
-
-    elevation: 5,
-    shadowColor: "#4F46E5",
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-  },
-
-  loginAlreadyAccount: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 28,
-  },
-  card: {
-  backgroundColor: "#FFFFFF",
-  borderRadius: 25,
-  padding: 25,
-
-  elevation: 8,
-  shadowColor: "#000",
-  shadowOpacity: 0.1,
-  shadowRadius: 15,
-  shadowOffset: {
-    width: 0,
-    height: 6,
-  },
-},
-signupText:{
-    color:"#4F46E5",
-    fontWeight:"700",
-    marginLeft:5,
-    fontSize:16,
-}
+  container: { flex: 1 },
+  scrollContent: { flexGrow: 1, justifyContent: "center" },
+  card: { borderWidth: 1, padding: 24 },
+  logoSection: { alignItems: "center", marginBottom: 28 },
+  sparkleBadge: { width: 56, height: 56, borderRadius: 28, justifyContent: "center", alignItems: "center", marginBottom: 12 },
+  title: { letterSpacing: 0.5, marginBottom: 4 },
+  subtitle: { textAlign: "center", lineHeight: 20 },
+  inputGroup: { marginBottom: 18 },
+  label: { letterSpacing: 0.5, marginBottom: 6, fontWeight: "600" },
+  inputWrapper: { flexDirection: "row", alignItems: "center", borderWidth: 1, height: 52, paddingHorizontal: 14 },
+  inputIcon: { marginRight: 10 },
+  input: { flex: 1, fontSize: 16 },
+  eyeBtn: { padding: 4 },
+  primaryBtn: { height: 52, justifyContent: "center", alignItems: "center", marginTop: 10 },
+  primaryBtnText: {},
+  footerRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: 20 },
+  footerText: {},
+  linkText: {},
+  dividerRow: { flexDirection: "row", alignItems: "center", marginVertical: 22 },
+  dividerLine: { flex: 1, height: 1 },
+  dividerText: { marginHorizontal: 12, letterSpacing: 0.5 },
+  googleBtn: { height: 52, flexDirection: "row", justifyContent: "center", alignItems: "center", borderWidth: 1 },
+  googleIcon: { width: 22, height: 22, marginRight: 10 },
+  googleBtnText: {},
 });

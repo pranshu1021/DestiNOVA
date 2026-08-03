@@ -4,31 +4,44 @@ import { Ionicons } from "@expo/vector-icons";
 import { ThemeContext } from "../context/ThemeContext";
 
 export default function Header({ user, onLeftPress, onRightPress }) {
-  const { colors, spacing, typography, borderRadius } = useContext(ThemeContext);
+  const { colors, spacing, typography, borderRadius, shadows } = useContext(ThemeContext);
 
   return (
-    <View style={[styles.headerContainer, { backgroundColor: colors.card, borderBottomColor: colors.border, paddingHorizontal: spacing.xxl }]}>
-  
+    <View
+      style={[
+        styles.headerContainer,
+        {
+          backgroundColor: colors.card,
+          borderBottomColor: colors.border,
+          paddingHorizontal: spacing.xxl,
+          ...shadows.soft,
+        },
+      ]}
+    >
       <TouchableOpacity activeOpacity={0.7} onPress={onLeftPress} style={styles.leftAction}>
         {user?.photo ? (
           <Image source={{ uri: user.photo }} style={[styles.avatar, { borderColor: colors.primary }]} />
         ) : (
           <View style={[styles.avatarPlaceholder, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}>
-            <Ionicons name="person" size={16} color={colors.primary} />
+            <Ionicons name="menu" size={20} color={colors.primary} />
           </View>
         )}
       </TouchableOpacity>
 
-    
       <View style={styles.titleContainer}>
-        <Text style={[styles.titleText, { fontSize: typography.sizes.h2, fontWeight: typography.weights.bold, color: colors.primary }]}>
-          DestiNOVA
-        </Text>
+        <View style={styles.logoRow}>
+          <Ionicons name="sparkles" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+          <Text style={[styles.titleText, { fontSize: typography.sizes.h2, fontWeight: typography.weights.bold, color: colors.textMain }]}>
+            DestiNOVA
+          </Text>
+        </View>
       </View>
 
       <TouchableOpacity activeOpacity={0.7} onPress={onRightPress} style={styles.rightAction}>
-        <Ionicons name="notifications-outline" size={24} color={colors.textMain} />
-        <View style={[styles.badgeDot, { backgroundColor: colors.danger }]} />
+        <View style={[styles.iconCircle, { backgroundColor: colors.primaryLight }]}>
+          <Ionicons name="notifications-outline" size={18} color={colors.primary} />
+          <View style={[styles.badgeDot, { backgroundColor: colors.accent }]} />
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -39,7 +52,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: 56,
+    height: 60,
     borderBottomWidth: 1,
   },
   leftAction: {
@@ -47,15 +60,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     borderWidth: 1.5,
   },
   avatarPlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1.5,
@@ -64,22 +77,31 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
+  logoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   titleText: {
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   rightAction: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  iconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: "center",
+    alignItems: "center",
     position: "relative",
-    width: 36,
-    height: 36,
   },
   badgeDot: {
     position: "absolute",
-    top: 6,
-    right: 6,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    top: 8,
+    right: 8,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
   },
 });

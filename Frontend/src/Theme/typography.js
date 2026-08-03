@@ -1,18 +1,21 @@
 export const typography = {
   sizes: {
-    h1: 28,
-    h2: 22,
-    h3: 18,
-    large: 16,
-    body: 14,
-    small: 12,
-    caption: 10,
+    display: 36,   // Hero titles
+    h1: 30,
+    h2: 24,
+    h3: 20,
+    large: 17,
+    body: 15,
+    small: 13,
+    caption: 11,
   },
+
   weights: {
-    bold: "800",
+    black: "900",
+    bold: "700",
     semiBold: "600",
     medium: "500",
     regular: "400",
+    light: "300",
   },
 };
-

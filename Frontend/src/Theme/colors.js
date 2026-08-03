@@ -1,37 +1,66 @@
 export const darkColors = {
-  background: "#12071F",      
-  card: "#1A102B",            
-  cardBorder: "#2D1D4A",
-  primary: "#7C3AED",        
-  primaryLight: "#A78BFA",
-  primaryDark: "#5B21B6",
-  accent: "#D8B4FE",          
-  textMain: "#F3E8FF",        
-  textSub: "#C084FC",        
-  textMuted: "#7C3AED",      
-  border: "#24143B",
-  white: "#FFFFFF",
-  success: "#10B981",
-  successBg: "#1F2937",
-  warning: "#F59E0B",
-  danger: "#EF4444",
+  background: "#1A0507",      // Deep Royal Burgundy
+  background2: "#2A090D",
+
+  card: "rgba(48,12,17,0.90)",
+  cardSolid: "#341015",
+  cardBorder: "rgba(201,168,106,0.25)",
+
+  primary: "#C9A86A",          // Antique Gold
+  primaryDark: "#A67C3A",
+  primaryLight: "rgba(201,168,106,0.18)",
+
+  secondary: "#8A1E2A",        // Royal Crimson
+  secondaryLight: "rgba(138,30,42,0.20)",
+
+  accent: "#E8D4A2",           // Champagne Gold
+
+  textMain: "#FFF8EC",
+  textSub: "#D9C8A1",
+  textMuted: "#B79F73",
+
+  border: "rgba(201,168,106,0.18)",
+
+  glassOverlay:"rgba(20,5,7,0.72)",
+
+  success:"#4F9B68",
+  warning:"#C7922C",
+  danger:"#D64C4C",
+
+  white:"#FFFFFF"
 };
+
 export const lightColors = {
-  background: "#F8F4FF",     
-  card: "#FFFFFF",           
-  cardBorder: "#E8D8FF",
-  primary: "#7C3AED",        
-  primaryLight: "#DDD6FE",
-  primaryDark: "#5B21B6",
-  accent: "#8B5CF6",       
-  textMain: "#1E1B4B",      
-  textSub: "#6a29d4",       
-  textMuted: "#A78BFA",      
-  border: "#EEE6FF",       
-  white: "#FFFFFF",
-  success: "#10B981",
-  successBg: "#ECFDF5",
-  warning: "#F59E0B",
-  danger: "#EF4444",
+
+  background:"#F7F1E6",
+
+  card:"rgba(255,250,242,0.94)",
+
+  cardSolid:"#FFF8F1",
+
+  primary:"#B78A49",
+
+  secondary:"#8B2635",
+
+  accent:"#E7D8B2",
+
+  textMain:"#351A12",
+
+  textSub:"#725337",
+
+  textMuted:"#9D8467",
+
+  border:"#E2D3B2",
+
+  glassOverlay:"rgba(255,248,241,0.82)",
+
+  success:"#3D8A59",
+
+  warning:"#B9892C",
+
+  danger:"#C13C3C",
+
+  white:"#FFFFFF"
 };
+
 export const colors = darkColors;

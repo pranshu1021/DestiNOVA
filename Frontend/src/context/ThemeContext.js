@@ -1,54 +1,51 @@
-import React, {createContext, useState, useEffect} from "react";
-import  {useColorScheme } from "react-native";
+import React, { createContext, useState, useEffect } from "react";
+import { useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {darkColors, lightColors} from "../theme/colors";
-import{ gradients} from "../theme/gradients";
-import {shadows} from "../theme/shadows";
-import { spacing} from "../theme/spacing";
-import { typography } from "../theme/typography";
-import {borderRadius} from "../theme/borderRadius";
-import {animations} from "../theme/animations";
-import {icons} from "../theme/icons";
+import { darkColors, lightColors } from "../Theme/colors";
+import { gradients } from "../Theme/gradients";
+import { shadows } from "../Theme/shadows";
+import { spacing } from "../Theme/spacing";
+import { typography } from "../Theme/typography";
+import { borderRadius } from "../Theme/borderRadius";
+import { animations } from "../Theme/animations";
+import { icons } from "../Theme/icons";
 
 export const ThemeContext = createContext();
 
-export const ThemeProvider = ({children}) =>{
-    const systemScheme = useColorScheme(); // yeh bttata hai ki system dark mode mei h ya light
+export const ThemeProvider = ({ children }) => {
+    const systemScheme = useColorScheme();
     const [themeMode, setThemeModeState] = useState("system");
     const [activeTheme, setActiveTheme] = useState(systemScheme === "dark" ? "dark" : "light");
     
-    // ab idhar load karlete hai jab bhi tumhara phn boot hoye
     useEffect(() => {
-        const loadTheme = async () =>{
-            try{
+        const loadTheme = async () => {
+            try {
                 const savedMode = await AsyncStorage.getItem("themeMode");
-                if(savedMode){
+                if (savedMode) {
                     setThemeModeState(savedMode);
                 }
-            }catch(error){
+            } catch (error) {
                 console.log("Error loading theme settings:", error);
             }
         };
-        loadTheme()
-    }, [])
-    // update active colors jab bhi thememode ya fir system theme change ho 
-    useEffect(()=>{
-        if(themeMode==="system"){
-            setActiveTheme(systemScheme === "dark" ? "dark" : "light" ); //explain this
-        }else{
-            setActiveTheme(themeMode)
-        }
-    },[themeMode, systemScheme])
+        loadTheme();
+    }, []);
 
-    const setThemeMode = async(mode) =>{
-        try{
+    useEffect(() => {
+        if (themeMode === "system") {
+            setActiveTheme(systemScheme === "dark" ? "dark" : "light");
+        } else {
+            setActiveTheme(themeMode);
+        }
+    }, [themeMode, systemScheme]);
+
+    const setThemeMode = async (mode) => {
+        try {
             await AsyncStorage.setItem("themeMode", mode);
             setThemeModeState(mode);
-        }
-        catch(error){
+        } catch (error) {
             console.log("Error saving theme settings:", error);
         }
-
     };
 
     const isDark = activeTheme === "dark";
@@ -68,10 +65,10 @@ export const ThemeProvider = ({children}) =>{
         animations,
         icons,
     };
+
     return (
-        <ThemeContext.Provider value = {value}>
+        <ThemeContext.Provider value={value}>
             {children}
         </ThemeContext.Provider>
-    )
-
-}
+    );
+};

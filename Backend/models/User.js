@@ -42,10 +42,10 @@ const userSchema = new mongoose.Schema({
         default:"",
     },
 
-    dateOfBirth:{
-        type: Date,
-        default:null,
-    }
+    dateOfBirth: {
+    type: String,
+    default: "",
+}
     ,
     birthTime:{
         type:String,
@@ -63,10 +63,24 @@ const userSchema = new mongoose.Schema({
     birthLongitude: {
         type: Number,
         default:null,
-    }
-    ,profileCompleted:{
+    },
+    profileCompleted:{
         type: Boolean,
         default: false,
+    },
+    notificationSettings: {
+        dailyHoroscope: { type: Boolean, default: true },
+        muhuratReminders: { type: Boolean, default: true },
+        festivalReminders: { type: Boolean, default: true },
+        pushToken: { type: String, default: "" },
+    },
+    isPremium: {
+        type: Boolean,
+        default: false,
+    },
+    premiumExpiresAt: {
+        type: Date,
+        default: null,
     }
 
 },

@@ -1,4 +1,5 @@
 export const spacing = {
+  xxs: 2,
   xs: 4,
   sm: 8,
   md: 12,
@@ -7,6 +8,5 @@ export const spacing = {
   xxl: 24,
   xxxl: 32,
   giant: 40,
+  huge: 56,
 };
-
-

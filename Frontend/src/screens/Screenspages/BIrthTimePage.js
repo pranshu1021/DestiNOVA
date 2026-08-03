@@ -1,205 +1,168 @@
-import React,{useState,useContext} from "react";
-import{
+import React, { useState, useContext } from "react";
+import {
     View,
-    TouchableOpacity,
     Text,
     StyleSheet,
-    Platform,
-    Alert
-    
+    TouchableOpacity,
+    Alert,
+    Platform
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker"
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import OnboardingLayout from "../../components/OnboardingLayout";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import OnBoardingLayout from "../../components/OnboardingLayout";
 import api from "../../services/api";
 import { AuthContext } from "../../context/AuthContext";
 import { ThemeContext } from "../../context/ThemeContext";
 
-
-export default function BirthTimePage(){
-    const navigation=useNavigation();
-
+export default function BirthTimePage() {
+    const navigation = useNavigation();
     const { user, updateUser } = useContext(AuthContext);
-      const { colors, borderRadius, shadows } = useContext(ThemeContext);
+    const { colors, borderRadius, shadows, typography } = useContext(ThemeContext);
 
-    const initialTime = (()=>{
-        if(user?.BirthTime){
-            // parse "HH:MM Am/PM"
-            try{
-
-                const [time,modifier] = user.birthTime.split(" ");
-                let [hours, minutes] = time.split(":");
-
-                hours = parseInt(hours,10) ///string se Int mei convert kr rhe hai
-                minutes = parseInt(minutes,10)
-
-                if(modifier === "PM" && hours < 12) hours +=12;
-                if(modifier === "AM" && hours === 12) hours +=0;
-                    //constructor
+    // Initial birth time or default to 12:00 PM
+    const parseInitialTime = () => {
+        if (user?.birthTime) {
+            const timeParts = user.birthTime.match(/^(\d+):(\d+)\s*(AM|PM)$/i);
+            if (timeParts) {
+                let hours = parseInt(timeParts[1], 10);
+                const minutes = parseInt(timeParts[2], 10);
+                const ampm = timeParts[3].toUpperCase();
+                if (ampm === "PM" && hours < 12) hours += 12;
+                if (ampm === "AM" && hours === 12) hours = 0;
                 const d = new Date();
-                d.setHours(hours,minutes,0,0);
+                d.setHours(hours, minutes, 0, 0);
                 return d;
             }
-            catch(e){
-                return new Date();
-            }
         }
-        return new Date();
-    })();
-  
-    const [birthTime, setBirthTime] = useState(initialTime);
-    const [showPicker,setShowPicker] = useState(false);
+        const d = new Date();
+        d.setHours(12, 0, 0, 0);
+        return d;
+    };
+
+    const [time, setTime] = useState(parseInitialTime());
+    const [showPicker, setShowPicker] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const onChangeTime = (event,selectedTime)=>{
-        setShowPicker(false);
-        if(selectedTime){
-            setBirthTime(selectedTime);
+    const handleTimeChange = (event, selectedTime) => {
+        if (Platform.OS === "android") {
+            setShowPicker(false);
+        }
+        if (selectedTime) {
+            setTime(selectedTime);
         }
     };
 
-    const formatTime = (date)=>{
-        return date.toLocaleTimeString("en-US",{
+    const formatTimeString = (t) => {
+        return t.toLocaleTimeString("en-US", {
             hour: "2-digit",
             minute: "2-digit",
-            hour12: true,
+            hour12: true
+        });
+    };
 
-        })
-    }
-
-      const handleContinue = async() =>{
-        
-
-        try{
+    const handleContinue = async () => {
+        const timeStr = formatTimeString(time);
+        try {
             setLoading(true);
-            const timeStr = formatTime(birthTime)
-            const response=await api.put("/update-profile",{
-                birthTime: timeStr,
+            const response = await api.put("/auth/update-profile", {
+                birthTime: timeStr
             });
 
-
-             if(response.data.success){
-                            await updateUser(response.data.user)
-                            navigation.navigate("BirthPlace");
-                        }
-                        else{
-                            Alert.alert("Error", response.data.message|| "Failed to update profile"); 
-                        }
-        }
-        catch(error){
-            console.log("BirthTimePage Error: ",error)
+            if (response.data.success) {
+                await updateUser(response.data.user);
+                navigation.navigate("BirthPlace");
+            } else {
+                Alert.alert("Error", response.data.message || "Failed to update profile.");
+            }
+        } catch (error) {
+            console.log("BirthTimePage Error", error);
             Alert.alert(
                 "Connection Error",
-                error.response?.data?.message || "Failed to connect to the server" 
+                error.response?.data?.message || "Failed to connect to the server."
             );
+        } finally {
+            setLoading(false);
         }
-        finally{
-            setLoading(false)
-        }
-      };
-      const handleBack = () =>{
-        navigation.goBack()
     };
-    const handleSkip = ()=>{
-        navigation.navigate("Home");
-    }
+
+    const handleBack = () => {
+        navigation.goBack();
+    };
 
     return (
-        <OnboardingLayout
-        onBack = {handleBack}
-        currentStep={4}
-        iconName ="time"
-        title="What time were you born?"
-        subtitle="Your birth time will help us calculate
-        your birth chart with greater accuracy."
-        isScrollable={false}
-        onContinue={handleContinue}
-        continueLoading ={loading}
-        onSkip={handleSkip}
+        <OnBoardingLayout
+            onBack={handleBack}
+            currentStep={4}
+            iconName="time"
+            title="What time were you born?"
+            subtitle="The exact birth time is essential for accurate house cusps and ascendant calculation."
+            isScrollable={false}
+            onContinue={handleContinue}
+            continueDisabled={false}
+            continueLoading={loading}
         >
-            <View style = {styles.contentContainer}>
+            <View style={styles.contentContainer}>
                 <TouchableOpacity
-                activeOpacity={0.8}
-                style={[
-                    styles.timeCard,
-                    {
-                        backgroundColor:colors.card,
-                        borderColor:colors.border,
-                        borderRadius:borderRadius.xl,
-                        ...shadows.soft,
-
-                    }
-                ]}
-                onPress={()=>setShowPicker(true)}
-                disabled={loading}
+                    activeOpacity={0.8}
+                    onPress={() => setShowPicker(true)}
+                    style={[
+                        styles.timeCard,
+                        {
+                            backgroundColor: colors.card,
+                            borderColor: colors.border,
+                            borderRadius: borderRadius.lg,
+                            ...shadows.soft
+                        }
+                    ]}
                 >
-                    <Text style ={[styles.timeLabel, {color:colors.textSub}]}>
-                        Selected Birth Time
-                    </Text>
-                    <Text style ={[styles.timeText, {color:colors.primary}]}>
-                        {formatTime(birthTime)}
-                    </Text>
-                    <View style = {styles.editRow}>
-                        <Ionicons name = "time-outline" size={24} color = {colors.primary}/>
-                        <Text style = {[styles.editText, {colors:colors.primary}]}>
-                            Change Time
+                    <Ionicons name="time-outline" size={28} color={colors.primary} />
+                    <View style={styles.textContainer}>
+                        <Text style={[styles.label, { color: colors.textSub, fontSize: typography.sizes.small }]}>
+                            Birth Time
+                        </Text>
+                        <Text style={[styles.timeText, { color: colors.textMain, fontSize: typography.sizes.large, fontWeight: typography.weights.bold }]}>
+                            {formatTimeString(time)}
                         </Text>
                     </View>
+                    <Ionicons name="chevron-forward" size={20} color={colors.textSub} />
                 </TouchableOpacity>
 
                 {showPicker && (
-                    <DateTimePicker 
-                    value = {birthTime}
-                    mode="time"
-                    display={Platform.OS === "ios" ? "spinner" : "default"}
-                    onChange={onChangeTime}
+                    <DateTimePicker
+                        value={time}
+                        mode="time"
+                        display={Platform.OS === "ios" ? "spinner" : "default"}
+                        is24Hour={false}
+                        onChange={handleTimeChange}
                     />
                 )}
-
             </View>
-
-        </OnboardingLayout>
-    )
+        </OnBoardingLayout>
+    );
 }
+
 const styles = StyleSheet.create({
-    contentContainer:{
-        marginVertical: 10,
+    contentContainer: {
         width: "100%",
-        alignItems:"center",
-
-    }
-    ,
-    timeCard:{
-        width: "100%",
-        paddingVertical:24,
-        paddingHorizontal:20,
-        alignItems:"center",
+        justifyContent: "center",
+        alignItems: "center",
+        marginVertical: 40
+    },
+    timeCard: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 20,
+        height: 80,
         borderWidth: 1.5,
-
+        width: "100%"
     },
-    timeLabel: {
-        fontSize:13,
-        fontWeight:"600",
-        marginBottom:8,
-        textTransform:"uppercase",
-        letterSpacing:0.5,
+    textContainer: {
+        flex: 1,
+        marginLeft: 16
     },
-    timeText:{
-        fontSize: 32,
-        fontWeight:"800",
-        marginVertical:8,
+    label: {
+        marginBottom: 2
     },
-    editRow:
-    {
-        flexDirection:"row",
-        alignItems:"center",
-        alignTop: 8,
-
-    },
-    editText:{
-        fontWeight:"600",
-        fontSize:14,
-        marginLeft:6,
-    }
-})
+    timeText: {}
+});
