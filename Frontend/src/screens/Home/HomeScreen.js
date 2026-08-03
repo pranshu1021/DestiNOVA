@@ -220,12 +220,13 @@ export default function HomeScreen() {
           onClose={() => setIsDrawerOpen(false)}
           user={user}
           onViewProfile={() => navigation.navigate("Profile")}
-          onPremium={() => navigation.navigate("Subscription")}
-          onHoroscope={() => navigation.navigate("Horoscope")}
-          onKundli={() => navigation.navigate("KundliMatching")}
-          onAIChat={() => navigation.navigate("AIChat")}
-          onNotifications={() => navigation.navigate("NotificationSettings")}
-          onHelp={() => Alert.alert("DestiNOVA Support", "Contact support@destinova.app for assistance.")}
+          onPremium={() => handleFeatureAlert("Premium")}
+          onHoroscope={() => handleFeatureAlert("Horoscope")}
+          onKundli={() => handleFeatureAlert("Kundli Matching")}
+          onAIChat={() => handleFeatureAlert("AI Chat")}
+          onNotifications={() => handleFeatureAlert("Notifications")}
+          onHelp={() => handleFeatureAlert("Help Center")}
+          onAstroSignup={() => navigation.navigate("AstroSignup")}
           onLogout={logout}
         />
       </SafeAreaView>

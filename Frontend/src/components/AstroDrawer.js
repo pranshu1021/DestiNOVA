@@ -22,17 +22,18 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const DRAWER_WIDTH = SCREEN_WIDTH * 0.8;
 
 export default function AstroDrawer({
-  isOpen,
-  onClose,
-  user,
-  onViewProfile,
-  onPremium,
-  onHoroscope,
-  onKundli,
-  onAIChat,
-  onNotifications,
-  onHelp,
-  onLogout,
+    isOpen,
+    onClose,
+    user,
+    onViewProfile,
+    onPremium,
+    onHoroscope,
+    onKundli,
+    onAIChat,
+    onNotifications,
+    onHelp,
+    onLogout,
+    onAstroSignup,
 }) {
   const { colors, typography, borderRadius, themeMode, setThemeMode, shadows } = useContext(ThemeContext);
 
@@ -75,15 +76,17 @@ export default function AstroDrawer({
 
   if (!shouldRender) return null;
 
-  const menuItems = [
-    { label: "My Profile", icon: "person-outline", onPress: onViewProfile },
-    { label: "DestiNOVA PRO", icon: "star-outline", onPress: onPremium, badge: "PRO", badgeColor: colors.accent },
-    { label: "Daily Horoscope", icon: "planet-outline", onPress: onHoroscope },
-    { label: "Kundli Matching", icon: "heart-outline", onPress: onKundli },
-    { label: "Astro AI Guide", icon: "chatbubbles-outline", onPress: onAIChat, badge: "AI", badgeColor: colors.primary },
-    { label: "Notification Settings", icon: "notifications-outline", onPress: onNotifications },
-    { label: "Help & Support", icon: "help-circle-outline", onPress: onHelp },
-  ];
+    const menuItems = [
+        {label: "My Profile", icon: "person-outline", onPress: onViewProfile},
+        {label: "Premium Upgrade", icon: "star-outline", onPress: onPremium, badge:"PRO"},
+        {label: "Daily Horoscope", icon: "planet-outline", onPress: onHoroscope},
+        {label: "Kundli Matching", icon: "heart-outline", onPress: onKundli},
+        {label: "AI Astrology Chat", icon: "chatbubble-outline", onPress: onAIChat},
+        {label: "Notifications", icon: "notifications-outline", onPress: onNotifications},
+        {label: "Help & Support", icon: "help-circle-outline", onPress: onHelp},
+        {label:"Become An Astrologer" , icon:"sparkles-outline",onPress:onAstroSignup},
+   
+    ];
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
@@ -94,6 +97,7 @@ export default function AstroDrawer({
           onPress={onClose}
         />
       )}
+
 
       <Animated.View
         style={[

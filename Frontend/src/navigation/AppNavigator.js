@@ -25,6 +25,7 @@ import AIChatScreen from "../screens/AI/AIChatScreen";
 import SubscriptionScreen from "../screens/Premium/SubscriptionScreen";
 import HistoryScreen from "../screens/History/HistoryScreen";
 
+import AstroSignup from "../screens/AstrologerScreen/AstroSignup";
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -38,41 +39,49 @@ export default function AppNavigator() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             {token ? (
                 user?.profileCompleted ? (
-                    <>
-                        <Stack.Screen name="Home" component={Home} />
-                        <Stack.Screen name="Profile" component={ProfileScreen} />
-                        <Stack.Screen name="Horoscope" component={HoroscopeScreen} />
-                        <Stack.Screen name="Kundli" component={KundliScreen} />
-                        <Stack.Screen name="KundliMatching" component={KundliMatchingScreen} />
-                        <Stack.Screen name="Panchang" component={PanchangScreen} />
-                        <Stack.Screen name="Muhurat" component={MuhuratScreen} />
-                        <Stack.Screen name="Numerology" component={NumerologyScreen} />
-                        <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
-                        <Stack.Screen name="AIChat" component={AIChatScreen} />
-                        <Stack.Screen name="Subscription" component={SubscriptionScreen} />
-                        <Stack.Screen name="History" component={HistoryScreen} />
-                    </>
+                   <>
+    <Stack.Screen name="Home" component={Home} />
+    <Stack.Screen name="Profile" component={ProfileScreen} />
+    <Stack.Screen name="Horoscope" component={HoroscopeScreen} />
+    <Stack.Screen name="Kundli" component={KundliScreen} />
+    <Stack.Screen name="KundliMatching" component={KundliMatchingScreen} />
+    <Stack.Screen name="Panchang" component={PanchangScreen} />
+    <Stack.Screen name="Muhurat" component={MuhuratScreen} />
+    <Stack.Screen name="Numerology" component={NumerologyScreen} />
+    <Stack.Screen
+        name="NotificationSettings"
+        component={NotificationSettingsScreen}
+    />
+    <Stack.Screen name="AIChat" component={AIChatScreen} />
+    <Stack.Screen name="Subscription" component={SubscriptionScreen} />
+    <Stack.Screen name="History" component={HistoryScreen} />
+    <Stack.Screen name="AstroSignup" component={AstroSignup} />
+</>
                 ) : (
-                    <>
-                        <Stack.Screen name="Name" component={Name} />
-                        <Stack.Screen name="Gender" component={Gender} />
-                        <Stack.Screen name="DateOfBirth" component={DateOfBirth} />
-                        <Stack.Screen name="BirthTime" component={BirthTime} />
-                        <Stack.Screen name="BirthPlace" component={PlaceOfBirth} />
-                       
-                        <Stack.Screen name="Home" component={Home} />
-                        <Stack.Screen name="Profile" component={ProfileScreen} />
-                        <Stack.Screen name="Horoscope" component={HoroscopeScreen} />
-                        <Stack.Screen name="Kundli" component={KundliScreen} />
-                        <Stack.Screen name="KundliMatching" component={KundliMatchingScreen} />
-                        <Stack.Screen name="Panchang" component={PanchangScreen} />
-                        <Stack.Screen name="Muhurat" component={MuhuratScreen} />
-                        <Stack.Screen name="Numerology" component={NumerologyScreen} />
-                        <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
-                        <Stack.Screen name="AIChat" component={AIChatScreen} />
-                        <Stack.Screen name="Subscription" component={SubscriptionScreen} />
-                        <Stack.Screen name="History" component={HistoryScreen} />
-                    </>
+                   <>
+    <Stack.Screen name="Name" component={Name} />
+    <Stack.Screen name="Gender" component={Gender} />
+    <Stack.Screen name="DateOfBirth" component={DateOfBirth} />
+    <Stack.Screen name="BirthTime" component={BirthTime} />
+    <Stack.Screen name="BirthPlace" component={PlaceOfBirth} />
+
+    <Stack.Screen name="Home" component={Home} />
+    <Stack.Screen name="Profile" component={ProfileScreen} />
+    <Stack.Screen name="Horoscope" component={HoroscopeScreen} />
+    <Stack.Screen name="Kundli" component={KundliScreen} />
+    <Stack.Screen name="KundliMatching" component={KundliMatchingScreen} />
+    <Stack.Screen name="Panchang" component={PanchangScreen} />
+    <Stack.Screen name="Muhurat" component={MuhuratScreen} />
+    <Stack.Screen name="Numerology" component={NumerologyScreen} />
+    <Stack.Screen
+        name="NotificationSettings"
+        component={NotificationSettingsScreen}
+    />
+    <Stack.Screen name="AIChat" component={AIChatScreen} />
+    <Stack.Screen name="Subscription" component={SubscriptionScreen} />
+    <Stack.Screen name="History" component={HistoryScreen} />
+    <Stack.Screen name="AstroSignup" component={AstroSignup} />
+</>
                 )
             ) : (
                 <>
