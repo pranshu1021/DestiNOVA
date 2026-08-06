@@ -81,6 +81,14 @@ const userSchema = new mongoose.Schema({
     premiumExpiresAt: {
         type: Date,
         default: null,
+    },
+    isAdmin: {
+        type: Boolean,
+        default: false,
+    },
+    isSuspended: {
+        type: Boolean,
+        default: false,
     }
 
 },

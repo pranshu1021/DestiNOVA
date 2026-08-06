@@ -3,21 +3,32 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemeContext } from "../context/ThemeContext";
+import { AuthContext } from "../context/AuthContext";
 
 export default function CosmicBottomBar({ currentRoute }) {
   const navigation = useNavigation();
   const route = useRoute();
   const { colors, typography, borderRadius, shadows } = useContext(ThemeContext);
+  const { user } = useContext(AuthContext);
 
   const activeRouteName = currentRoute || route?.name || "Home";
 
-  const tabs = [
+  const defaultTabs = [
     { name: "Home", label: "Home", icon: "sparkles", outlineIcon: "sparkles-outline" },
     { name: "Horoscope", label: "Horoscope", icon: "planet", outlineIcon: "planet-outline" },
     { name: "AIChat", label: "AI Guide", icon: "chatbubbles", outlineIcon: "chatbubbles-outline" },
     { name: "History", label: "History", icon: "time", outlineIcon: "time-outline" },
     { name: "Profile", label: "Profile", icon: "person", outlineIcon: "person-outline" },
   ];
+
+  const astrologerTabs = [
+    { name: "AstrologerDashboard", label: "Dashboard", icon: "speedometer", outlineIcon: "speedometer-outline" },
+    { name: "AstrologerSessions", label: "Sessions", icon: "chatbubbles", outlineIcon: "chatbubbles-outline" },
+    { name: "AstrologerAnalytics", label: "Analytics", icon: "stats-chart", outlineIcon: "stats-chart-outline" },
+    { name: "Profile", label: "Profile", icon: "person", outlineIcon: "person-outline" },
+  ];
+
+  const tabs = user?.astrologer?.isApproved ? astrologerTabs : defaultTabs;
 
   return (
     <View style={styles.floatingContainer} pointerEvents="box-none">

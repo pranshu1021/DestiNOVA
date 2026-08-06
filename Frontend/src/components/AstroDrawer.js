@@ -31,9 +31,11 @@ export default function AstroDrawer({
     onKundli,
     onAIChat,
     onNotifications,
+    onWallet,
     onHelp,
     onLogout,
     onAstroSignup,
+    onAdmin,
 }) {
   const { colors, typography, borderRadius, themeMode, setThemeMode, shadows } = useContext(ThemeContext);
 
@@ -78,14 +80,19 @@ export default function AstroDrawer({
 
     const menuItems = [
         {label: "My Profile", icon: "person-outline", onPress: onViewProfile},
-        {label: "Premium Upgrade", icon: "star-outline", onPress: onPremium, badge:"PRO"},
+        {label: "DestiNOVA PRO", icon: "star-outline", onPress: onPremium, badge: "PRO", badgeColor: colors.accent},
         {label: "Daily Horoscope", icon: "planet-outline", onPress: onHoroscope},
         {label: "Kundli Matching", icon: "heart-outline", onPress: onKundli},
-        {label: "AI Astrology Chat", icon: "chatbubble-outline", onPress: onAIChat},
-        {label: "Notifications", icon: "notifications-outline", onPress: onNotifications},
+        {label: "Astro AI Guide", icon: "chatbubbles-outline", onPress: onAIChat, badge: "AI", badgeColor: colors.primary},
+        {label: "Wallet", icon: "wallet-outline", onPress: onWallet},
+        ...(user?.isAdmin ? [{label: "Admin Panel", icon: "shield-checkmark-outline", onPress: onAdmin, badge: "ADMIN", badgeColor: colors.danger}] : []),
+        {label: "Notification Settings", icon: "notifications-outline", onPress: onNotifications},
         {label: "Help & Support", icon: "help-circle-outline", onPress: onHelp},
-        {label:"Become An Astrologer" , icon:"sparkles-outline",onPress:onAstroSignup},
-   
+        {
+          label: user?.astrologer?.isApproved ? "My Astro Dashboard" : "Become An Astrologer",
+          icon: "sparkles-outline",
+          onPress: onAstroSignup,
+        },
     ];
 
   return (
@@ -218,6 +225,7 @@ const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "#000000",
+    zIndex: 9998,
   },
   drawerContainer: {
     position: "absolute",
@@ -227,6 +235,8 @@ const styles = StyleSheet.create({
     width: DRAWER_WIDTH,
     justifyContent: "space-between",
     borderRightWidth: 1,
+    zIndex: 9999,
+    elevation: 24,
   },
   profileHeader: {
     paddingHorizontal: 20,

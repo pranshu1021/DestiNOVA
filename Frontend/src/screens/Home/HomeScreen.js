@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import {
   Alert,
   BackHandler,
@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { AuthContext } from "../../context/AuthContext";
 import { ThemeContext } from "../../context/ThemeContext";
@@ -21,14 +21,17 @@ import HoroscopeCard from "../../components/HoroscopeCard";
 import CosmicBackground from "../../components/CosmicBackground";
 import CosmicBottomBar from "../../components/CosmicBottomBar";
 import api from "../../services/api";
+import { ActivityIndicator } from "react-native";
 
 export default function HomeScreen() {
   const navigation = useNavigation();
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, refreshUserProfile } = useContext(AuthContext);
   const { colors, isDark, shadows, typography, borderRadius, spacing } = useContext(ThemeContext);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [dailyHoroscope, setDailyHoroscope] = useState(null);
   const [horoscopeError, setHoroscopeError] = useState("");
+  const [astrologers, setAstrologers] = useState([]);
+  const [isLoadingAstrologers, setIsLoadingAstrologers] = useState(true);
 
   useEffect(() => {
     const backAction = () => {
@@ -42,6 +45,32 @@ export default function HomeScreen() {
     const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
     return () => backHandler.remove();
   }, [isDrawerOpen]);
+
+  const loadAstrologers = useCallback(async () => {
+    try {
+      setIsLoadingAstrologers(true);
+      const response = await api.get("/astrologer/list");
+      setAstrologers(response.data.data || []);
+    } catch (error) {
+      console.log("Astrologer list error:", error);
+      setAstrologers([]);
+    } finally {
+      setIsLoadingAstrologers(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user?.astrologer?.isApproved) {
+      navigation.replace("AstrologerDashboard");
+    }
+  }, [user, navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshUserProfile();
+      loadAstrologers();
+    }, [refreshUserProfile, loadAstrologers])
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -78,29 +107,6 @@ export default function HomeScreen() {
     { name: "Panchang", route: "Panchang", icon: "calendar-outline", color: colors.success },
     { name: "Muhurat", route: "Muhurat", icon: "time-outline", color: colors.warning },
     { name: "Numerology", route: "Numerology", icon: "calculator-outline", color: colors.primary },
-  ];
-
-  const topAstrologers = [
-    {
-      id: "1",
-      name: "Astro Pranshu",
-      specialty: "Vedic Kundli & Planetary Dasha",
-      experience: 12,
-      rating: 4.9,
-      price: 25,
-      isOnline: true,
-      image: "https://imgs.search.brave.com/fxX6_2cmiEfUFyDh7w2G-6PzVulrvJ3IpduN8aUxfYA/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzE2LzI0/LzU2LzE2MjQ1Njhj/Mjk4N2JjMDQ5ZmU0/OGQ0M2I4ZTFiNzBk/LmpwZw",
-    },
-    {
-      id: "2",
-      name: "Tarot Mehak",
-      specialty: "Tarot & Cosmic Energy Reading",
-      experience: 8,
-      rating: 4.9,
-      price: 30,
-      isOnline: true,
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80",
-    },
   ];
 
   return (
@@ -198,18 +204,30 @@ export default function HomeScreen() {
           </View>
 
           {/* Top Astrologers */}
-          <HomeSection title="Top Vedic Astrologers" actionText="See All" onActionPress={() => Alert.alert("Astrologers", "Vedic consultation booking available soon.")}>
-            {topAstrologers.map((astro) => (
-              <AstrologerCard
-                key={astro.id}
-                name={astro.name}
-                specialty={astro.specialty}
-                experience={astro.experience}
-                rating={astro.rating}
-                price={astro.price}
-                image={astro.image}
-              />
-            ))}
+          <HomeSection title="Top Vedic Astrologers" actionText="See All" onActionPress={() => navigation.navigate("AstrologerList") }>
+            {isLoadingAstrologers ? (
+              <View style={[styles.loadingRow, { paddingHorizontal: spacing.xxl, paddingVertical: spacing.md }]}> 
+                <ActivityIndicator size="small" color={colors.primary} />
+              </View>
+            ) : astrologers.length === 0 ? (
+              <View style={[styles.emptyRow, { paddingHorizontal: spacing.xxl, paddingVertical: spacing.md }]}> 
+                <Text style={[styles.emptyText, { color: colors.textSub }]}>No approved astrologers are available right now.</Text>
+              </View>
+            ) : (
+              astrologers.slice(0, 4).map((astro) => (
+                <AstrologerCard
+                  key={astro._id}
+                  name={astro.fullName || astro.name}
+                  specialty={astro.expertise ? astro.expertise.join(", ") : astro.about || "Vedic Astrology"}
+                  experience={astro.experienceYears || astro.experience || 0}
+                  rating={astro.rating || 0}
+                  price={astro.chatPricePerMinute || astro.price || 0}
+                  image={astro.profilePhoto || astro.image}
+                  isOnline={astro.isOnline}
+                  onPress={() => navigation.navigate("AstrologerDetail", { astrologerId: astro._id })}
+                />
+              ))
+            )}
           </HomeSection>
         </ScrollView>
 
@@ -220,13 +238,15 @@ export default function HomeScreen() {
           onClose={() => setIsDrawerOpen(false)}
           user={user}
           onViewProfile={() => navigation.navigate("Profile")}
-          onPremium={() => handleFeatureAlert("Premium")}
-          onHoroscope={() => handleFeatureAlert("Horoscope")}
-          onKundli={() => handleFeatureAlert("Kundli Matching")}
-          onAIChat={() => handleFeatureAlert("AI Chat")}
-          onNotifications={() => handleFeatureAlert("Notifications")}
-          onHelp={() => handleFeatureAlert("Help Center")}
-          onAstroSignup={() => navigation.navigate("AstroSignup")}
+          onPremium={() => navigation.navigate("Subscription")}
+          onHoroscope={() => navigation.navigate("Horoscope")}
+          onKundli={() => navigation.navigate("KundliMatching")}
+          onAIChat={() => navigation.navigate("AIChat")}
+          onNotifications={() => navigation.navigate("NotificationSettings")}
+          onAdmin={() => navigation.navigate("AdminPanel")}
+          onAstroSignup={() => navigation.navigate(user?.astrologer?.isApproved ? "AstrologerDashboard" : "AstroSignup")}
+          onWallet={() => navigation.navigate("Wallet")}
+          onHelp={() => Alert.alert("DestiNOVA Support", "Contact support@destinova.app for assistance.")}
           onLogout={logout}
         />
       </SafeAreaView>
@@ -264,6 +284,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   categoryText: { textAlign: "center" },
+  loadingRow: { alignItems: "center", justifyContent: "center" },
+  emptyRow: { alignItems: "center", justifyContent: "center" },
+  emptyText: { fontSize: 14, textAlign: "center" },
   horoscopeStatusCard: { padding: 24, alignItems: "center", marginHorizontal: 20, borderWidth: 1 },
   horoscopeStatus: { textAlign: "center" },
   premiumBanner: {},

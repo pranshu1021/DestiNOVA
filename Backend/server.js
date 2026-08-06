@@ -39,6 +39,8 @@ app.get("/ready", (req, res) => {
   res.status(database === "connected" ? 200 : 503).json({ status: database === "connected" ? "ready" : "not_ready", database });
 });
 
+const { initSocket } = require("./config/socket");
+
 app.use("/api/auth", authRoutes);
 app.use("/api/horoscope", horoscopeRoutes);
 app.use("/api/kundli", require("./routes/kundli"));
@@ -48,6 +50,9 @@ app.use("/api/muhurat", require("./routes/muhurat"));
 app.use("/api/numerology", require("./routes/numerology"));
 app.use("/api/ai", require("./routes/ai"));
 app.use("/api/history", require("./routes/history"));
+app.use("/api/wallet", require("./routes/wallet"));
+app.use("/api/astrologer", require("./routes/astrologer"));
+app.use("/api/admin", require("./routes/admin"));
 
 app.use((req, res, next) => next(new AppError("Route not found.", 404)));
 
@@ -75,7 +80,11 @@ const shutdown = (signal) => {
 
 const startServer = async () => {
   await connectDB();
-  server = app.listen(config.port, () => logger.info("server.started", { port: config.port, environment: config.nodeEnv }));
+  const http = require("http");
+  const httpServer = http.createServer(app);
+  initSocket(httpServer);
+
+  server = httpServer.listen(config.port, () => logger.info("server.started", { port: config.port, environment: config.nodeEnv }));
   process.once("SIGTERM", () => shutdown("SIGTERM"));
   process.once("SIGINT", () => shutdown("SIGINT"));
   return server;
