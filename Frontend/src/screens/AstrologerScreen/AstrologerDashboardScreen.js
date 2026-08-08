@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   ActivityIndicator,
   Alert,
@@ -28,8 +29,12 @@ export default function AstrologerDashboardScreen({ navigation }) {
   const loadDashboard = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get("/astrologer/dashboard");
-      setDashboard(response.data.data || null);
+      const [dashboardResponse, requestsResponse] = await Promise.all([
+        api.get("/astrologer/dashboard"),
+        api.get("/consultations/mine?status=PENDING"),
+      ]);
+      setDashboard(dashboardResponse.data.data || null);
+      setPendingRequest((requestsResponse.data.data || [])[0] || null);
     } catch (error) {
       console.log("Astrologer dashboard error:", error);
       Alert.alert("Unable to load dashboard", error.response?.data?.message || "Please try again later.");
@@ -39,8 +44,9 @@ export default function AstrologerDashboardScreen({ navigation }) {
     }
   }, []);
 
+  useFocusEffect(useCallback(() => { loadDashboard(); }, [loadDashboard]));
+
   useEffect(() => {
-    loadDashboard();
     let socket;
     const handleRequest = ({ session }) => {
       setPendingRequest(session);
