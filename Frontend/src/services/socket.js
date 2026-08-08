@@ -12,7 +12,12 @@ export const initSocket = async () => {
 
   const token = await AsyncStorage.getItem("token");
   socket = io(SOCKET_URL, {
-    transports: ["websocket"],
+    // Some Android/LAN networks reject a direct WebSocket upgrade. Polling establishes
+    // the authenticated Socket.IO session first, then Socket.IO upgrades when possible.
+    transports: ["polling", "websocket"],
+    timeout: 10000,
+    reconnection: true,
+    reconnectionAttempts: 8,
     auth: {
       token,
     },

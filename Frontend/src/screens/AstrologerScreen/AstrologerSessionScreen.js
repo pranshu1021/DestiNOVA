@@ -109,6 +109,23 @@ export default function AstrologerSessionScreen({ navigation, route }) {
     }
   }, [sessionId]);
 
+  const syncSessionStatus = useCallback(async () => {
+    if (!sessionId) return;
+    try {
+      const response = await api.get("/consultations/mine");
+      const session = (response.data.data || []).find((item) => item._id === sessionId);
+      if (!session) return;
+      if (session.status === "ACTIVE") {
+        setRequestAccepted(true);
+        setSessionStatus("Session active");
+      } else if (session.status === "REJECTED" || session.status === "ENDED") {
+        setRequestAccepted(false);
+        setSessionStatus(session.status === "REJECTED" ? "Request rejected" : "Session ended");
+        setCallStatus("ended");
+      }
+    } catch (_) {}
+  }, [sessionId]);
+
   const registerSocketListeners = useCallback((socket) => {
     socket.on("receive_message", handleReceiveMessage);
     socket.on("user_typing", handleUserTyping);
@@ -151,9 +168,10 @@ export default function AstrologerSessionScreen({ navigation, route }) {
       socket.off("consultation_rejected");
       socket.off("session_started");
       socket.off("session_ended");
+      socket.off("connect", syncSessionStatus);
       socket.emit("end_call", { sessionId });
     }
-  }, [handleReceiveMessage, handleUserTyping, handleIncomingCall, handleCallAccepted, handleCallEnded, astrologerUserId]);
+  }, [handleReceiveMessage, handleUserTyping, handleIncomingCall, handleCallAccepted, handleCallEnded, astrologerUserId, syncSessionStatus]);
 
   const joinRoom = useCallback(async () => {
     try {
@@ -161,6 +179,7 @@ export default function AstrologerSessionScreen({ navigation, route }) {
       const socket = await initSocket();
       registerSocketListeners(socket);
       socket.emit("join_room", { sessionId, userId: currentUserId });
+      socket.on("connect", syncSessionStatus);
       setSocketReady(true);
       if (pendingRequest) {
         setSessionStatus("Waiting for astrologer to accept...");
@@ -171,16 +190,17 @@ export default function AstrologerSessionScreen({ navigation, route }) {
     } finally {
       setLoading(false);
     }
-  }, [sessionId, currentUserId, pendingRequest, registerSocketListeners]);
+  }, [sessionId, currentUserId, pendingRequest, registerSocketListeners, syncSessionStatus]);
 
   useEffect(() => {
     loadWalletBalance();
     loadHistory();
+    syncSessionStatus();
     joinRoom();
     return () => {
       leaveRoom();
     };
-  }, [joinRoom, loadHistory, loadWalletBalance, leaveRoom]);
+  }, [joinRoom, loadHistory, loadWalletBalance, leaveRoom, syncSessionStatus]);
 
   const sendTypingEvent = useCallback((isTyping) => {
     const socket = getSocket();
