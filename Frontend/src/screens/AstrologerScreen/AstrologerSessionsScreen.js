@@ -9,19 +9,18 @@ import CosmicBottomBar from "../../components/CosmicBottomBar";
 
 export default function AstrologerSessionsScreen({ navigation }) {
   const { colors, spacing, typography, borderRadius, shadows } = useContext(ThemeContext);
-  const [transactions, setTransactions] = useState([]);
+  const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadSessions = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get("/wallet/balance");
-      const data = response.data.data || {};
-      setTransactions(data.transactions || []);
+      const response = await api.get("/chat/conversations");
+      setConversations(response.data.data || []);
     } catch (error) {
       console.log("Astrologer sessions load error:", error);
       Alert.alert("Unable to load sessions", error.response?.data?.message || "Please try again later.");
-      setTransactions([]);
+      setConversations([]);
     } finally {
       setLoading(false);
     }
@@ -32,20 +31,36 @@ export default function AstrologerSessionsScreen({ navigation }) {
   }, [loadSessions]);
 
   const renderSession = ({ item }) => {
-    const isCredit = item.type === "CREDIT";
-    const category = item.category?.replace(/_/g, " ") || "Session";
-    const sessionType = category.toLowerCase().includes("call") ? "Call" : category.toLowerCase().includes("chat") ? "Chat" : "Session";
     return (
-      <View style={[styles.sessionCard, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: borderRadius.xl, ...shadows.soft }]}> 
-        <View>
-          <Text style={[styles.sessionTitle, { color: colors.textMain }]}>{sessionType}</Text>
-          <Text style={[styles.sessionSubtitle, { color: colors.textSub }]}>{item.description || category}</Text>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate("AstrologerSession", {
+          sessionId: item.sessionId,
+          astrologerName: item.partnerName || "Conversation",
+          astrologerUserId: item.partnerId,
+          sessionType: "chat",
+          costPerMinute: 15,
+        })}
+        style={[styles.sessionCard, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: borderRadius.xl, ...shadows.soft }]}
+      >
+        <View style={styles.sessionMain}>
+          <View style={[styles.avatarBadge, { backgroundColor: colors.primaryLight }]}> 
+            <Ionicons name="person" size={16} color={colors.primary} />
+          </View>
+          <View style={styles.sessionTextWrap}>
+            <Text style={[styles.sessionTitle, { color: colors.textMain }]}>{item.partnerName || "Conversation"}</Text>
+            <Text style={[styles.sessionSubtitle, { color: colors.textSub }]}>{item.lastMessage || "Start a chat"}</Text>
+          </View>
         </View>
         <View style={styles.sessionMeta}>
-          <Text style={[styles.sessionAmount, { color: isCredit ? colors.success : colors.danger }]}>{isCredit ? "+" : "-"}₹{item.amount}</Text>
-          <Text style={[styles.sessionTime, { color: colors.textSub }]}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+          {item.unreadCount ? (
+            <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}> 
+              <Text style={[styles.unreadText, { color: colors.white }]}>{item.unreadCount}</Text>
+            </View>
+          ) : null}
+          <Text style={[styles.sessionTime, { color: colors.textSub }]}>{item.lastMessageAt ? new Date(item.lastMessageAt).toLocaleDateString() : "New"}</Text>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -80,7 +95,7 @@ export default function AstrologerSessionsScreen({ navigation }) {
         </View>
 
         <View style={styles.content}>
-          {transactions.length === 0 ? (
+          {conversations.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="chatbubbles-outline" size={40} color={colors.primary} />
               <Text style={[styles.emptyTitle, { color: colors.textMain }]}>No recent sessions yet</Text>
@@ -88,8 +103,8 @@ export default function AstrologerSessionsScreen({ navigation }) {
             </View>
           ) : (
             <FlatList
-              data={transactions}
-              keyExtractor={(item) => item._id || String(item.createdAt) + item.amount}
+              data={conversations}
+              keyExtractor={(item) => item.sessionId}
               renderItem={renderSession}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
@@ -113,11 +128,15 @@ const styles = StyleSheet.create({
   subtitle: {},
   content: { flex: 1, padding: 20 },
   statusText: { textAlign: "center" },
-  sessionCard: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", padding: 18, marginBottom: 14, borderWidth: 1 },
+  sessionCard: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 18, marginBottom: 14, borderWidth: 1 },
+  sessionMain: { flexDirection: "row", alignItems: "center", flex: 1 },
+  avatarBadge: { width: 38, height: 38, borderRadius: 19, justifyContent: "center", alignItems: "center", marginRight: 12 },
+  sessionTextWrap: { flex: 1 },
   sessionTitle: { fontSize: 16, fontWeight: "700", marginBottom: 6 },
   sessionSubtitle: { fontSize: 13, lineHeight: 20 },
-  sessionMeta: { alignItems: "flex-end" },
-  sessionAmount: { fontSize: 16, fontWeight: "700", marginBottom: 4 },
+  sessionMeta: { alignItems: "flex-end", marginLeft: 10 },
+  unreadBadge: { minWidth: 24, height: 24, borderRadius: 12, justifyContent: "center", alignItems: "center", paddingHorizontal: 6, marginBottom: 6 },
+  unreadText: { fontSize: 12, fontWeight: "700" },
   sessionTime: { fontSize: 12 },
   emptyState: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 30 },
   emptyTitle: { marginTop: 16, fontSize: 18, fontWeight: "700" },

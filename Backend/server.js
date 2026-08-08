@@ -52,6 +52,7 @@ app.use("/api/ai", require("./routes/ai"));
 app.use("/api/history", require("./routes/history"));
 app.use("/api/wallet", require("./routes/wallet"));
 app.use("/api/astrologer", require("./routes/astrologer"));
+app.use("/api/chat", require("./routes/chat"));
 app.use("/api/admin", require("./routes/admin"));
 
 app.use((req, res, next) => next(new AppError("Route not found.", 404)));

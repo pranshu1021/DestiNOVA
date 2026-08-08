@@ -12,15 +12,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemeContext } from "../../context/ThemeContext";
 import { AuthContext } from "../../context/AuthContext";
 import api from "../../services/api";
+import { initSocket, getSocket } from "../../services/socket";
 import CosmicBackground from "../../components/CosmicBackground";
 import CosmicBottomBar from "../../components/CosmicBottomBar";
 
 export default function AstrologerDashboardScreen({ navigation }) {
   const { colors, spacing, typography, borderRadius, shadows } = useContext(ThemeContext);
-  const { logout } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext);
+  const currentUserId = user?.id || user?._id || user?.userId || "";
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState(null);
 
   const loadDashboard = useCallback(async () => {
     try {
@@ -38,6 +41,18 @@ export default function AstrologerDashboardScreen({ navigation }) {
 
   useEffect(() => {
     loadDashboard();
+    const registerSocket = async () => {
+      try {
+        const socket = await initSocket();
+        socket.on("incoming_chat_request", ({ sessionId, customerId, pricePerMinute, customerName, astrologerName }) => {
+          setPendingRequest({ sessionId, customerId, pricePerMinute, customerName, astrologerName });
+          Alert.alert("New chat request", `${customerName || "A customer"} wants to start a chat.`);
+        });
+      } catch (error) {
+        console.log("Dashboard socket init error:", error);
+      }
+    };
+    registerSocket();
   }, [loadDashboard]);
 
   const toggleOnlineStatus = async () => {
@@ -52,6 +67,37 @@ export default function AstrologerDashboardScreen({ navigation }) {
     } finally {
       setUpdatingStatus(false);
     }
+  };
+
+  const acceptPendingRequest = () => {
+    if (!pendingRequest?.sessionId || !currentUserId) return;
+    const socket = getSocket();
+    if (!socket) return;
+    socket.emit("accept_chat_request", {
+      sessionId: pendingRequest.sessionId,
+      customerId: pendingRequest.customerId,
+      astrologerId: currentUserId,
+    });
+    setPendingRequest(null);
+    navigation.navigate("AstrologerSession", {
+      sessionId: pendingRequest.sessionId,
+      astrologerId: pendingRequest.astrologerId,
+      astrologerName: pendingRequest.astrologerName || "Astrologer",
+      astrologerUserId: pendingRequest.customerId,
+      sessionType: "chat",
+      costPerMinute: pendingRequest.pricePerMinute || 15,
+    });
+  };
+
+  const rejectPendingRequest = () => {
+    if (!pendingRequest?.sessionId) return;
+    const socket = getSocket();
+    if (!socket) return;
+    socket.emit("reject_chat_request", {
+      sessionId: pendingRequest.sessionId,
+      customerId: pendingRequest.customerId,
+    });
+    setPendingRequest(null);
   };
 
   if (loading) {
@@ -121,6 +167,22 @@ export default function AstrologerDashboardScreen({ navigation }) {
               <Text style={[styles.metricValue, { color: colors.success }]}>₹{dashboard?.balance ?? 0}</Text>
             </View>
           </View>
+
+          {pendingRequest ? (
+            <View style={[styles.pendingCard, { backgroundColor: colors.cardSolid, borderColor: colors.primary, borderRadius: borderRadius.xl }]}> 
+              <Text style={[styles.sectionTitle, { color: colors.textMain }]}>Incoming Chat Request</Text>
+              <Text style={[styles.sectionText, { color: colors.textSub, marginTop: spacing.sm }]}> {pendingRequest.customerName || "A customer"} wants to start a chat.</Text>
+              <Text style={[styles.sectionText, { color: colors.textSub }]}>Rate: ₹{pendingRequest.pricePerMinute || 15}/min</Text>
+              <View style={styles.pendingActions}> 
+                <TouchableOpacity activeOpacity={0.8} style={[styles.pendingButton, { backgroundColor: colors.success, borderRadius: borderRadius.md }]} onPress={acceptPendingRequest}> 
+                  <Text style={[styles.pendingButtonText, { color: colors.white }]}>Accept</Text>
+                </TouchableOpacity>
+                <TouchableOpacity activeOpacity={0.8} style={[styles.pendingButton, { backgroundColor: colors.secondary, borderRadius: borderRadius.md }]} onPress={rejectPendingRequest}> 
+                  <Text style={[styles.pendingButtonText, { color: colors.white }]}>Reject</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : null}
 
           <TouchableOpacity
             activeOpacity={0.8}

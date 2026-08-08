@@ -12,15 +12,20 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemeContext } from "../../context/ThemeContext";
+import { AuthContext } from "../../context/AuthContext";
 import api from "../../services/api";
+import { initSocket, getSocket } from "../../services/socket";
 import CosmicBackground from "../../components/CosmicBackground";
 import CosmicBottomBar from "../../components/CosmicBottomBar";
 
 export default function AstrologerDetailScreen({ route, navigation }) {
   const { colors, spacing, typography, borderRadius, shadows } = useContext(ThemeContext);
+  const { user } = useContext(AuthContext);
   const { astrologerId } = route.params || {};
+  const currentUserId = user?.id || user?._id || user?.userId || "";
   const [astrologer, setAstrologer] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [requesting, setRequesting] = useState(false);
 
   const loadAstrologer = useCallback(async () => {
     try {
@@ -44,11 +49,46 @@ export default function AstrologerDetailScreen({ route, navigation }) {
     }
   }, [astrologerId, loadAstrologer, navigation]);
 
-  const showBooking = (type) => {
-    Alert.alert(
-      "Coming Soon",
-      `The ${type} booking experience for ${astrologer?.fullName || "this astrologer"} is under development. Please check back soon.`
-    );
+  const requestChat = async () => {
+    if (!astrologer?._id || !currentUserId) {
+      Alert.alert("Login required", "Please sign in to start a chat.");
+      return;
+    }
+
+    if (currentUserId === astrologer?.userId) {
+      Alert.alert("Blocked", "You cannot start a chat with yourself.");
+      return;
+    }
+
+    try {
+      setRequesting(true);
+      const socket = await initSocket();
+      const sessionId = `${currentUserId}_${astrologer._id}_${Date.now()}`;
+      const payload = {
+        customerId: currentUserId,
+        astrologerId: astrologer._id,
+        sessionId,
+        pricePerMinute: astrologer?.chatPricePerMinute || 15,
+        customerName: user?.fullName || user?.name || "Customer",
+        astrologerName: astrologer?.fullName || "Astrologer",
+      };
+      socket.emit("request_chat", payload);
+
+      navigation.navigate("AstrologerSession", {
+        sessionId,
+        astrologerId: astrologer._id,
+        astrologerName: astrologer.fullName,
+        astrologerUserId: astrologer.userId,
+        sessionType: "chat",
+        costPerMinute: astrologer?.chatPricePerMinute || 15,
+        pendingRequest: true,
+      });
+      Alert.alert("Request sent", "Waiting for astrologer to accept...");
+    } catch (error) {
+      Alert.alert("Request failed", error.message || "Could not send the chat request.");
+    } finally {
+      setRequesting(false);
+    }
   };
 
   if (loading) {
@@ -113,15 +153,14 @@ export default function AstrologerDetailScreen({ route, navigation }) {
           <TouchableOpacity
             activeOpacity={0.8}
             style={[styles.actionButton, { backgroundColor: colors.primary, borderRadius: borderRadius.lg }]}
-            onPress={() => navigation.navigate("AstrologerSession", {
-              astrologerId: astrologer._id,
-              astrologerName: astrologer.fullName,
-              astrologerUserId: astrologer.userId,
-              sessionType: "chat",
-              costPerMinute: astrologer?.chatPricePerMinute || astrologer?.chatPrice || 15,
-            })}
+            onPress={requestChat}
+            disabled={requesting}
           >
-            <Text style={[styles.actionButtonText, { color: colors.white }]}>Request Chat</Text>
+            {requesting ? (
+              <ActivityIndicator size="small" color={colors.white} />
+            ) : (
+              <Text style={[styles.actionButtonText, { color: colors.white }]}>Request Chat</Text>
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.8}

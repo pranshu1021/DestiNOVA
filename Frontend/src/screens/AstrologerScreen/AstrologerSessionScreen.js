@@ -18,6 +18,7 @@ import { AuthContext } from "../../context/AuthContext";
 import api from "../../services/api";
 import { getSocket, initSocket } from "../../services/socket";
 import CosmicBackground from "../../components/CosmicBackground";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function AstrologerSessionScreen({ navigation, route }) {
   const { colors, spacing, typography, borderRadius, shadows } = useContext(ThemeContext);
@@ -37,6 +38,7 @@ export default function AstrologerSessionScreen({ navigation, route }) {
     sessionType,
     costPerMinute: routeCostPerMinute,
     sessionId: routeSessionId,
+    pendingRequest,
   } = route.params || {};
 
   const currentUserId = useMemo(() => user?.id || user?._id || "", [user]);
@@ -48,10 +50,16 @@ export default function AstrologerSessionScreen({ navigation, route }) {
   const [sessionPaid, setSessionPaid] = useState(false);
   const [deductionLoading, setDeductionLoading] = useState(false);
   const [walletLoading, setWalletLoading] = useState(true);
+  const [requestAccepted, setRequestAccepted] = useState(Boolean(pendingRequest) ? false : true);
+  const [sessionStatus, setSessionStatus] = useState(pendingRequest ? "Waiting for astrologer to accept..." : "Connected");
 
   const handleReceiveMessage = useCallback((message) => {
     if (!message || message.sessionId !== sessionId) return;
-    setMessages((prev) => [...prev, message]);
+    setMessages((prev) => {
+      const exists = prev.some((m) => m._id && message._id && m._id === message._id);
+      if (exists) return prev;
+      return [...prev, message];
+    });
   }, [sessionId]);
 
   const handleUserTyping = useCallback(({ userId, isTyping }) => {
@@ -94,39 +102,80 @@ export default function AstrologerSessionScreen({ navigation, route }) {
     }
   }, []);
 
+  const loadHistory = useCallback(async () => {
+    try {
+      const response = await api.get(`/chat/session/${sessionId}`);
+      const history = response.data.data || [];
+      setMessages(history);
+    } catch (error) {
+      console.log("Chat history error:", error);
+    }
+  }, [sessionId]);
+
+  const registerSocketListeners = useCallback((socket) => {
+    socket.on("receive_message", handleReceiveMessage);
+    socket.on("user_typing", handleUserTyping);
+    socket.on("incoming_call", handleIncomingCall);
+    socket.on("call_accepted", handleCallAccepted);
+    socket.on("call_ended", handleCallEnded);
+    socket.on("chat_request_accepted", ({ sessionId: acceptedSessionId }) => {
+      if (acceptedSessionId !== sessionId) return;
+      setRequestAccepted(true);
+      setSessionStatus("Astrologer accepted your chat request.");
+      Alert.alert("Accepted", "Astrologer accepted your chat request.");
+    });
+    socket.on("chat_request_rejected", ({ message }) => {
+      setSessionStatus(message || "Astrologer is unavailable right now.");
+      setRequestAccepted(false);
+      Alert.alert("Rejected", message || "Astrologer is unavailable right now.");
+    });
+    socket.on("chat_started", ({ sessionId: startedSessionId }) => {
+      if (startedSessionId !== sessionId) return;
+      setRequestAccepted(true);
+      setSessionStatus("Chat started.");
+    });
+  }, [handleReceiveMessage, handleUserTyping, handleIncomingCall, handleCallAccepted, handleCallEnded, sessionId]);
+
+  const leaveRoom = useCallback(() => {
+    const socket = getSocket();
+    if (socket) {
+      socket.off("receive_message", handleReceiveMessage);
+      socket.off("user_typing", handleUserTyping);
+      socket.off("incoming_call", handleIncomingCall);
+      socket.off("call_accepted", handleCallAccepted);
+      socket.off("call_ended", handleCallEnded);
+      socket.off("chat_request_accepted");
+      socket.off("chat_request_rejected");
+      socket.off("chat_started");
+      socket.emit("end_call", { to: astrologerUserId });
+    }
+  }, [handleReceiveMessage, handleUserTyping, handleIncomingCall, handleCallAccepted, handleCallEnded, astrologerUserId]);
+
   const joinRoom = useCallback(async () => {
     try {
       const socket = await initSocket();
+      registerSocketListeners(socket);
       socket.emit("join_room", { sessionId, userId: currentUserId });
-      socket.on("receive_message", handleReceiveMessage);
-      socket.on("user_typing", handleUserTyping);
-      socket.on("incoming_call", handleIncomingCall);
-      socket.on("call_accepted", handleCallAccepted);
-      socket.on("call_ended", handleCallEnded);
       setSocketReady(true);
+      if (pendingRequest) {
+        setSessionStatus("Waiting for astrologer to accept...");
+      }
     } catch (error) {
       console.log("Socket init error:", error);
       Alert.alert("Connection failed", "Unable to connect to the live session.");
     } finally {
       setLoading(false);
     }
-  }, [sessionId, currentUserId, handleReceiveMessage, handleUserTyping, handleIncomingCall, handleCallAccepted, handleCallEnded]);
+  }, [sessionId, currentUserId, pendingRequest, registerSocketListeners]);
 
   useEffect(() => {
     loadWalletBalance();
+    loadHistory();
     joinRoom();
     return () => {
-      const socket = getSocket();
-      if (socket) {
-        socket.off("receive_message", handleReceiveMessage);
-        socket.off("user_typing", handleUserTyping);
-        socket.off("incoming_call", handleIncomingCall);
-        socket.off("call_accepted", handleCallAccepted);
-        socket.off("call_ended", handleCallEnded);
-        socket.emit("end_call", { to: astrologerUserId });
-      }
+      leaveRoom();
     };
-  }, [joinRoom, handleReceiveMessage, handleUserTyping, handleIncomingCall, handleCallAccepted, handleCallEnded, astrologerUserId, loadWalletBalance]);
+  }, [joinRoom, loadHistory, loadWalletBalance, leaveRoom]);
 
   const sendTypingEvent = useCallback((isTyping) => {
     const socket = getSocket();
@@ -176,6 +225,10 @@ export default function AstrologerSessionScreen({ navigation, route }) {
 
   const sendMessage = async () => {
     if (!text.trim()) return;
+    if (!requestAccepted && pendingRequest) {
+      Alert.alert("Pending", "Please wait for the astrologer to accept the request.");
+      return;
+    }
     if (!sessionPaid) {
       const canProceed = await ensureSessionCredit();
       if (!canProceed) return;
@@ -278,7 +331,7 @@ export default function AstrologerSessionScreen({ navigation, route }) {
           <Text style={[styles.statusText, { color: colors.textSub }]}>Wallet balance: ₹{walletBalance.toFixed(0)}</Text>
           <Text style={[styles.statusText, { color: colors.textSub }]}>Cost: ₹{costPerMinute.toFixed(0)} / min</Text>
           {typingStatus ? <Text style={[styles.statusText, { color: colors.primary }]}>{typingStatus}</Text> : null}
-          <Text style={[styles.statusText, { color: colors.textSub }]}>Status: {callStatus === "ready" ? "Connected" : callStatus === "calling" ? "Calling..." : callStatus === "connected" ? "Call active" : callStatus === "incoming" ? "Incoming call" : "Ended"}</Text>
+          <Text style={[styles.statusText, { color: colors.textSub }]}>Status: {pendingRequest && !requestAccepted ? sessionStatus : callStatus === "ready" ? "Connected" : callStatus === "calling" ? "Calling..." : callStatus === "connected" ? "Call active" : callStatus === "incoming" ? "Incoming call" : "Ended"}</Text>
           {deductionLoading ? <Text style={[styles.statusText, { color: colors.primary }]}>Authorizing session payment...</Text> : null}
         </View>
 
