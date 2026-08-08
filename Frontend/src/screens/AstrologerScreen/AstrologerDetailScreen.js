@@ -14,7 +14,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { ThemeContext } from "../../context/ThemeContext";
 import { AuthContext } from "../../context/AuthContext";
 import api from "../../services/api";
-import { initSocket, getSocket } from "../../services/socket";
 import CosmicBackground from "../../components/CosmicBackground";
 import CosmicBottomBar from "../../components/CosmicBottomBar";
 
@@ -49,7 +48,7 @@ export default function AstrologerDetailScreen({ route, navigation }) {
     }
   }, [astrologerId, loadAstrologer, navigation]);
 
-  const requestChat = async () => {
+  const requestConsultation = async (sessionType) => {
     if (!astrologer?._id || !currentUserId) {
       Alert.alert("Login required", "Please sign in to start a chat.");
       return;
@@ -62,25 +61,16 @@ export default function AstrologerDetailScreen({ route, navigation }) {
 
     try {
       setRequesting(true);
-      const socket = await initSocket();
-      const sessionId = `${currentUserId}_${astrologer._id}_${Date.now()}`;
-      const payload = {
-        customerId: currentUserId,
-        astrologerId: astrologer._id,
-        sessionId,
-        pricePerMinute: astrologer?.chatPricePerMinute || 15,
-        customerName: user?.fullName || user?.name || "Customer",
-        astrologerName: astrologer?.fullName || "Astrologer",
-      };
-      socket.emit("request_chat", payload);
+      const response = await api.post("/consultations/request", { astrologerId: astrologer._id, sessionType });
+      const session = response.data.data;
 
       navigation.navigate("AstrologerSession", {
-        sessionId,
+        sessionId: session._id,
         astrologerId: astrologer._id,
         astrologerName: astrologer.fullName,
         astrologerUserId: astrologer.userId,
-        sessionType: "chat",
-        costPerMinute: astrologer?.chatPricePerMinute || 15,
+        sessionType,
+        costPerMinute: session.pricePerMinute,
         pendingRequest: true,
       });
       Alert.alert("Request sent", "Waiting for astrologer to accept...");
@@ -153,7 +143,7 @@ export default function AstrologerDetailScreen({ route, navigation }) {
           <TouchableOpacity
             activeOpacity={0.8}
             style={[styles.actionButton, { backgroundColor: colors.primary, borderRadius: borderRadius.lg }]}
-            onPress={requestChat}
+            onPress={() => requestConsultation("chat")}
             disabled={requesting}
           >
             {requesting ? (
@@ -165,13 +155,7 @@ export default function AstrologerDetailScreen({ route, navigation }) {
           <TouchableOpacity
             activeOpacity={0.8}
             style={[styles.actionButton, { backgroundColor: colors.secondary, borderRadius: borderRadius.lg }]}
-            onPress={() => navigation.navigate("AstrologerSession", {
-              astrologerId: astrologer._id,
-              astrologerName: astrologer.fullName,
-              astrologerUserId: astrologer.userId,
-              sessionType: "call",
-              costPerMinute: astrologer?.callPricePerMinute || astrologer?.callPrice || 30,
-            })}
+            onPress={() => requestConsultation("voice")}
           >
             <Text style={[styles.actionButtonText, { color: colors.white }]}>Request Call</Text>
           </TouchableOpacity>

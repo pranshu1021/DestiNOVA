@@ -1,5 +1,5 @@
 const ChatMessage = require("../models/ChatMessage");
-const User = require("../models/User");
+const ConsultationSession = require("../models/ConsultationSession");
 const AppError = require("../utils/AppError");
 
 const getConversationPartnerId = (message, userId) => {
@@ -15,41 +15,15 @@ const getConversationPartnerId = (message, userId) => {
 const getConversations = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const messages = await ChatMessage.find({
-      $or: [{ senderId: userId }, { receiverId: userId }],
-    })
-      .sort({ createdAt: -1 })
-      .lean();
-
-    const sessions = new Map();
-
-    for (const message of messages) {
-      if (!sessions.has(message.sessionId)) {
-        const partnerId = getConversationPartnerId(message, userId);
-        const partner = partnerId ? await User.findById(partnerId).lean() : null;
-        sessions.set(message.sessionId, {
-          sessionId: message.sessionId,
-          partnerId,
-          partnerName: partner?.fullName || partner?.name || "Unknown",
-          partnerPhoto: partner?.photo || partner?.profilePhoto || "",
-          lastMessage: message.text || "New message",
-          lastMessageAt: message.createdAt,
-          unreadCount: 0,
-          status: "ACTIVE",
-        });
-      }
-
-      const entry = sessions.get(message.sessionId);
-      entry.lastMessage = message.text || "New message";
-      entry.lastMessageAt = message.createdAt;
-      if (message.receiverId?.toString() === userId && !message.isSeen) {
-        entry.unreadCount += 1;
-      }
-    }
-
-    const conversations = Array.from(sessions.values()).sort((a, b) => {
-      return new Date(b.lastMessageAt || 0) - new Date(a.lastMessageAt || 0);
-    });
+    const sessions = await ConsultationSession.find({ customerId: userId }).populate("astrologerId", "fullName profilePhoto userId isOnline").sort({ updatedAt: -1 }).lean();
+    const astrologer = await require("../models/Astrologer").findOne({ userId }).lean();
+    const ownedSessions = astrologer ? await ConsultationSession.find({ astrologerId: astrologer._id }).populate("customerId", "fullName photo").sort({ updatedAt: -1 }).lean() : sessions;
+    const conversations = await Promise.all(ownedSessions.map(async (session) => {
+      const isAstrologer = Boolean(astrologer);
+      const partner = isAstrologer ? session.customerId : session.astrologerId;
+      const [lastMessage, unreadCount] = await Promise.all([ChatMessage.findOne({ sessionId: String(session._id) }).sort({ createdAt: -1 }).lean(), ChatMessage.countDocuments({ sessionId: String(session._id), receiverId: userId, isSeen: false })]);
+      return { sessionId: String(session._id), partnerId: String(isAstrologer ? session.customerId._id : session.astrologerId.userId), partnerName: partner?.fullName || "Unknown", partnerPhoto: partner?.photo || partner?.profilePhoto || "", lastMessage: lastMessage?.text || (session.status === "PENDING" ? "Consultation requested" : "No messages yet"), lastMessageAt: lastMessage?.createdAt || session.updatedAt, unreadCount, status: session.status, sessionType: session.sessionType, pricePerMinute: session.pricePerMinute };
+    }));
 
     return res.json({ success: true, data: conversations });
   } catch (error) {
@@ -62,6 +36,8 @@ const getMessagesForSession = async (req, res, next) => {
     const { sessionId } = req.params;
     const userId = req.user.id;
 
+    const { assertParticipant } = require("../services/consultationService");
+    await assertParticipant(sessionId, userId);
     const messages = await ChatMessage.find({ sessionId }).sort({ createdAt: 1 }).lean();
     if (!messages.length) {
       return res.json({ success: true, data: [] });
@@ -93,6 +69,8 @@ const markMessagesSeen = async (req, res, next) => {
       throw new AppError("Invalid payload.", 400);
     }
 
+    const { assertParticipant } = require("../services/consultationService");
+    await assertParticipant(sessionId, userId);
     const result = await ChatMessage.updateMany(
       {
         _id: { $in: messageIds },

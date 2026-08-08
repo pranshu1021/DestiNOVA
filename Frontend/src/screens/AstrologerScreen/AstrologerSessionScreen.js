@@ -42,13 +42,9 @@ export default function AstrologerSessionScreen({ navigation, route }) {
   } = route.params || {};
 
   const currentUserId = useMemo(() => user?.id || user?._id || "", [user]);
-  const sessionId = useMemo(() => routeSessionId || `${currentUserId}_${astrologerId}_${Date.now()}`,
-    [routeSessionId, currentUserId, astrologerId]);
+  const sessionId = routeSessionId;
   const costPerMinute = useMemo(() => Number(routeCostPerMinute) || 15, [routeCostPerMinute]);
-  const paymentCategory = sessionType === "call" ? "CALL_DEDUCTION" : "CHAT_DEDUCTION";
   const [walletBalance, setWalletBalance] = useState(0);
-  const [sessionPaid, setSessionPaid] = useState(false);
-  const [deductionLoading, setDeductionLoading] = useState(false);
   const [walletLoading, setWalletLoading] = useState(true);
   const [requestAccepted, setRequestAccepted] = useState(Boolean(pendingRequest) ? false : true);
   const [sessionStatus, setSessionStatus] = useState(pendingRequest ? "Waiting for astrologer to accept..." : "Connected");
@@ -103,6 +99,7 @@ export default function AstrologerSessionScreen({ navigation, route }) {
   }, []);
 
   const loadHistory = useCallback(async () => {
+    if (!sessionId) return;
     try {
       const response = await api.get(`/chat/session/${sessionId}`);
       const history = response.data.data || [];
@@ -118,21 +115,27 @@ export default function AstrologerSessionScreen({ navigation, route }) {
     socket.on("incoming_call", handleIncomingCall);
     socket.on("call_accepted", handleCallAccepted);
     socket.on("call_ended", handleCallEnded);
-    socket.on("chat_request_accepted", ({ sessionId: acceptedSessionId }) => {
-      if (acceptedSessionId !== sessionId) return;
+    socket.on("consultation_accepted", ({ session }) => {
+      if (session?._id !== sessionId) return;
       setRequestAccepted(true);
       setSessionStatus("Astrologer accepted your chat request.");
       Alert.alert("Accepted", "Astrologer accepted your chat request.");
     });
-    socket.on("chat_request_rejected", ({ message }) => {
-      setSessionStatus(message || "Astrologer is unavailable right now.");
+    socket.on("consultation_rejected", ({ session }) => {
+      const message = session?.endReason || "Astrologer is unavailable right now.";
+      setSessionStatus(message);
       setRequestAccepted(false);
       Alert.alert("Rejected", message || "Astrologer is unavailable right now.");
     });
-    socket.on("chat_started", ({ sessionId: startedSessionId }) => {
-      if (startedSessionId !== sessionId) return;
+    socket.on("session_started", ({ session }) => {
+      if (session?._id !== sessionId) return;
       setRequestAccepted(true);
       setSessionStatus("Chat started.");
+    });
+    socket.on("session_ended", ({ session }) => {
+      if (session?._id !== sessionId) return;
+      setSessionStatus("Session ended");
+      setCallStatus("ended");
     });
   }, [handleReceiveMessage, handleUserTyping, handleIncomingCall, handleCallAccepted, handleCallEnded, sessionId]);
 
@@ -144,15 +147,17 @@ export default function AstrologerSessionScreen({ navigation, route }) {
       socket.off("incoming_call", handleIncomingCall);
       socket.off("call_accepted", handleCallAccepted);
       socket.off("call_ended", handleCallEnded);
-      socket.off("chat_request_accepted");
-      socket.off("chat_request_rejected");
-      socket.off("chat_started");
-      socket.emit("end_call", { to: astrologerUserId });
+      socket.off("consultation_accepted");
+      socket.off("consultation_rejected");
+      socket.off("session_started");
+      socket.off("session_ended");
+      socket.emit("end_call", { sessionId });
     }
   }, [handleReceiveMessage, handleUserTyping, handleIncomingCall, handleCallAccepted, handleCallEnded, astrologerUserId]);
 
   const joinRoom = useCallback(async () => {
     try {
+      if (!sessionId) throw new Error("Consultation session is missing.");
       const socket = await initSocket();
       registerSocketListeners(socket);
       socket.emit("join_room", { sessionId, userId: currentUserId });
@@ -192,48 +197,12 @@ export default function AstrologerSessionScreen({ navigation, route }) {
     typingTimeout.current = setTimeout(() => sendTypingEvent(false), 600);
   };
 
-  const ensureSessionCredit = useCallback(async () => {
-    if (sessionPaid) return true;
-    try {
-      setDeductionLoading(true);
-      const response = await api.post("/wallet/deduct", {
-        minutes: 1,
-        costPerMinute,
-        category: paymentCategory,
-      });
-      const data = response.data.data || {};
-      setWalletBalance(data.walletBalance ?? walletBalance);
-      setSessionPaid(true);
-      Alert.alert("Payment confirmed", `₹${Number(costPerMinute).toFixed(0)} deducted from your wallet to start the session.`);
-      return true;
-    } catch (error) {
-      console.log("Credit deduction failed:", error);
-      const message = error.response?.data?.message || "Unable to deduct wallet credits. Please recharge.";
-      Alert.alert(
-        "Payment failed",
-        message,
-        [
-          { text: "Go to Wallet", onPress: () => navigation.navigate("Wallet") },
-          { text: "Cancel", style: "cancel" },
-        ]
-      );
-      return false;
-    } finally {
-      setDeductionLoading(false);
-    }
-  }, [costPerMinute, paymentCategory, navigation, sessionPaid, walletBalance]);
-
   const sendMessage = async () => {
     if (!text.trim()) return;
     if (!requestAccepted && pendingRequest) {
       Alert.alert("Pending", "Please wait for the astrologer to accept the request.");
       return;
     }
-    if (!sessionPaid) {
-      const canProceed = await ensureSessionCredit();
-      if (!canProceed) return;
-    }
-
     const socket = getSocket();
     if (!socket) {
       Alert.alert("Not connected", "Please wait for the session to connect.");
@@ -242,50 +211,53 @@ export default function AstrologerSessionScreen({ navigation, route }) {
 
     const message = {
       sessionId,
-      senderId: currentUserId,
-      receiverId: astrologerUserId,
       text: text.trim(),
       createdAt: new Date().toISOString(),
     };
 
     socket.emit("send_message", message);
-    setMessages((prev) => [...prev, message]);
     setText("");
     sendTypingEvent(false);
   };
 
   const requestCall = async () => {
-    if (!sessionPaid) {
-      const canProceed = await ensureSessionCredit();
-      if (!canProceed) return;
-    }
-
     const socket = getSocket();
     if (!socket) {
       Alert.alert("Not connected", "Please wait for the session to connect.");
       return;
     }
     setCallStatus("calling");
-    socket.emit("call_offer", { to: astrologerUserId, from: currentUserId, callType: sessionType });
+    socket.emit("call_offer", { sessionId, callType: sessionType });
   };
 
   const acceptCall = () => {
     const socket = getSocket();
     if (!socket) return;
-    socket.emit("call_answer", { to: astrologerUserId, answer: "accepted" });
+    socket.emit("call_answer", { sessionId, answer: "accepted" });
     setCallStatus("connected");
   };
 
   const endCall = () => {
     const socket = getSocket();
     if (socket) {
-      socket.emit("end_call", { to: astrologerUserId });
+      socket.emit("end_call", { sessionId });
     }
     setCallStatus("ended");
+    api.post(`/consultations/${sessionId}/end`).catch(() => {});
+  };
+
+  const endSession = () => {
+    Alert.alert("End session?", "Billing will stop and both participants will be notified.", [
+      { text: "Cancel", style: "cancel" },
+      { text: "End", style: "destructive", onPress: async () => {
+        try { await api.post(`/consultations/${sessionId}/end`); setSessionStatus("Session ended"); setCallStatus("ended"); }
+        catch (error) { Alert.alert("Unable to end session", error.response?.data?.message || "Please try again."); }
+      } },
+    ]);
   };
 
   const renderMessage = ({ item }) => {
-    const isMine = item.senderId === currentUserId;
+    const isMine = String(item.senderId?._id || item.senderId) === String(currentUserId);
     return (
       <View style={[styles.messageRow, isMine ? styles.messageRight : styles.messageLeft]}>
         <View style={[styles.messageBubble, { backgroundColor: isMine ? colors.primary : colors.card, borderColor: colors.border }]}> 
@@ -324,6 +296,9 @@ export default function AstrologerSessionScreen({ navigation, route }) {
             <Text style={[styles.title, { color: colors.textMain, fontSize: typography.sizes.h2, fontWeight: typography.weights.bold }]}>{astrologerName}</Text>
             <Text style={[styles.subtitle, { color: colors.textSub, fontSize: typography.sizes.body }]}>{sessionType === "chat" ? "Live astrologer chat" : "Call session"}</Text>
           </View>
+          <TouchableOpacity onPress={endSession} disabled={callStatus === "ended" || pendingRequest}>
+            <Text style={[styles.endHeaderText, { color: colors.danger }]}>End</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={[styles.statusBanner, { backgroundColor: colors.card, borderColor: colors.border, ...shadows.soft }]}> 
@@ -332,7 +307,6 @@ export default function AstrologerSessionScreen({ navigation, route }) {
           <Text style={[styles.statusText, { color: colors.textSub }]}>Cost: ₹{costPerMinute.toFixed(0)} / min</Text>
           {typingStatus ? <Text style={[styles.statusText, { color: colors.primary }]}>{typingStatus}</Text> : null}
           <Text style={[styles.statusText, { color: colors.textSub }]}>Status: {pendingRequest && !requestAccepted ? sessionStatus : callStatus === "ready" ? "Connected" : callStatus === "calling" ? "Calling..." : callStatus === "connected" ? "Call active" : callStatus === "incoming" ? "Incoming call" : "Ended"}</Text>
-          {deductionLoading ? <Text style={[styles.statusText, { color: colors.primary }]}>Authorizing session payment...</Text> : null}
         </View>
 
         <FlatList
@@ -396,6 +370,7 @@ const styles = StyleSheet.create({
   backButton: { width: 44, height: 44, justifyContent: "center", alignItems: "center", marginRight: 12, borderWidth: 1 },
   headerTextWrapper: { flex: 1 },
   title: { marginBottom: 4 },
+  endHeaderText: { fontSize: 15, fontWeight: "700" },
   subtitle: {},
   statusBanner: { padding: 16, margin: 20, borderWidth: 1, borderRadius: 16 },
   statusText: { fontSize: 13, marginBottom: 4 },

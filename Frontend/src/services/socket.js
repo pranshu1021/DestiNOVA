@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 let socket = null;
 
-const SOCKET_URL = "http://10.0.2.2:5000";
+const SOCKET_URL = "http://192.168.1.3:5000";
 
 export const initSocket = async () => {
   if (socket) {

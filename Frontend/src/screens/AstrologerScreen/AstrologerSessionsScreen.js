@@ -6,6 +6,7 @@ import { ThemeContext } from "../../context/ThemeContext";
 import api from "../../services/api";
 import CosmicBackground from "../../components/CosmicBackground";
 import CosmicBottomBar from "../../components/CosmicBottomBar";
+import { initSocket } from "../../services/socket";
 
 export default function AstrologerSessionsScreen({ navigation }) {
   const { colors, spacing, typography, borderRadius, shadows } = useContext(ThemeContext);
@@ -28,6 +29,9 @@ export default function AstrologerSessionsScreen({ navigation }) {
 
   useEffect(() => {
     loadSessions();
+    let socket;
+    initSocket().then((instance) => { socket = instance; const refresh = () => loadSessions(); socket.on("new_message", refresh); socket.on("session_started", refresh); socket.on("session_ended", refresh); socket.__sessionsRefresh = refresh; });
+    return () => { if (socket?.__sessionsRefresh) { socket.off("new_message", socket.__sessionsRefresh); socket.off("session_started", socket.__sessionsRefresh); socket.off("session_ended", socket.__sessionsRefresh); } };
   }, [loadSessions]);
 
   const renderSession = ({ item }) => {
@@ -38,8 +42,8 @@ export default function AstrologerSessionsScreen({ navigation }) {
           sessionId: item.sessionId,
           astrologerName: item.partnerName || "Conversation",
           astrologerUserId: item.partnerId,
-          sessionType: "chat",
-          costPerMinute: 15,
+          sessionType: item.sessionType || "chat",
+          costPerMinute: item.pricePerMinute,
         })}
         style={[styles.sessionCard, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: borderRadius.xl, ...shadows.soft }]}
       >
@@ -50,6 +54,7 @@ export default function AstrologerSessionsScreen({ navigation }) {
           <View style={styles.sessionTextWrap}>
             <Text style={[styles.sessionTitle, { color: colors.textMain }]}>{item.partnerName || "Conversation"}</Text>
             <Text style={[styles.sessionSubtitle, { color: colors.textSub }]}>{item.lastMessage || "Start a chat"}</Text>
+            <Text style={[styles.sessionSubtitle, { color: colors.textSub }]}>{item.status}</Text>
           </View>
         </View>
         <View style={styles.sessionMeta}>

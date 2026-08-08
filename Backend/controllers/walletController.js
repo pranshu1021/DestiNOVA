@@ -41,24 +41,16 @@ const verifyPayment = async (req, res, next) => {
   }
 };
 
-const deductCredits = async (req, res, next) => {
+const markPaymentFailed = async (req, res, next) => {
   try {
-    const { minutes, costPerMinute, category } = req.body || {};
-    const result = await walletService.deductCreditsForSession(
-      req.user.id,
-      Number(minutes || 1),
-      Number(costPerMinute || 15),
-      category || "CHAT_DEDUCTION"
-    );
-    return res.json({ success: true, data: result });
-  } catch (error) {
-    return next(error);
-  }
+    const transaction = await walletService.markPaymentFailed(req.user.id, req.body?.razorpayOrderId, req.body?.reason);
+    return res.json({ success: true, data: transaction });
+  } catch (error) { return next(error); }
 };
 
 module.exports = {
   getBalance,
   createOrder,
   verifyPayment,
-  deductCredits,
+  markPaymentFailed,
 };

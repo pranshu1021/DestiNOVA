@@ -1,6 +1,7 @@
 const Astrologer = require("../models/Astrologer");
 const User = require("../models/User");
 const AppError = require("../utils/AppError");
+const ConsultationSession = require("../models/ConsultationSession");
 
 const registerAstrologer = async (req, res, next) => {
   try {
@@ -103,6 +104,14 @@ const getDashboard = async (req, res, next) => {
     const astrologer = await Astrologer.findOne({ userId: req.user.id }).lean();
     if (!astrologer) throw new AppError("Astrologer profile not found.", 404);
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const [pendingRequests, activeSessions, recentSessions, todayEarnings] = await Promise.all([
+      ConsultationSession.countDocuments({ astrologerId: astrologer._id, status: "PENDING" }),
+      ConsultationSession.countDocuments({ astrologerId: astrologer._id, status: "ACTIVE" }),
+      ConsultationSession.find({ astrologerId: astrologer._id }).populate("customerId", "fullName photo").sort({ updatedAt: -1 }).limit(5).lean(),
+      ConsultationSession.aggregate([{ $match: { astrologerId: astrologer._id, createdAt: { $gte: today } } }, { $group: { _id: null, total: { $sum: "$astrologerEarning" } } }]),
+    ]);
     return res.json({
       success: true,
       data: {
@@ -111,11 +120,27 @@ const getDashboard = async (req, res, next) => {
         balance: astrologer.walletBalance,
         rating: astrologer.rating,
         reviewsCount: astrologer.reviewsCount,
+        pendingRequests,
+        activeSessions,
+        recentSessions,
+        todayEarnings: todayEarnings[0]?.total || 0,
       },
     });
   } catch (error) {
     return next(error);
   }
+};
+
+const updateProfile = async (req, res, next) => {
+  try {
+    const allowed = ["about", "languages", "skills", "expertise", "experienceYears", "chatPricePerMinute", "callPricePerMinute", "profilePhoto", "isOnline"];
+    const update = Object.fromEntries(Object.entries(req.body || {}).filter(([key, value]) => allowed.includes(key) && value !== undefined));
+    if (update.chatPricePerMinute !== undefined && (!Number.isFinite(Number(update.chatPricePerMinute)) || Number(update.chatPricePerMinute) < 1)) throw new AppError("Chat price must be at least 1.", 400);
+    if (update.callPricePerMinute !== undefined && (!Number.isFinite(Number(update.callPricePerMinute)) || Number(update.callPricePerMinute) < 1)) throw new AppError("Call price must be at least 1.", 400);
+    const astrologer = await Astrologer.findOneAndUpdate({ userId: req.user.id, isApproved: true }, update, { new: true });
+    if (!astrologer) throw new AppError("Approved astrologer profile not found.", 404);
+    return res.json({ success: true, data: astrologer });
+  } catch (error) { return next(error); }
 };
 
 module.exports = {
@@ -124,4 +149,5 @@ module.exports = {
   getAstrologerById,
   updateStatus,
   getDashboard,
+  updateProfile,
 };

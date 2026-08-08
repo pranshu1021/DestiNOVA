@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import RazorpayCheckout from "react-native-razorpay";
 import { ThemeContext } from "../../context/ThemeContext";
 import api from "../../services/api";
 import CosmicBackground from "../../components/CosmicBackground";
@@ -42,17 +43,29 @@ export default function WalletScreen({ navigation }) {
       setRechargeLoading(true);
       const orderResponse = await api.post("/wallet/create-order", { amount });
       const orderData = orderResponse.data.data || {};
+      const payment = await RazorpayCheckout.open({
+        key: orderData.keyId,
+        amount: String(orderData.amount),
+        currency: orderData.currency,
+        name: "DestiNOVA",
+        description: "Wallet recharge",
+        order_id: orderData.orderId,
+        theme: { color: colors.primary },
+      });
       const verifyResponse = await api.post("/wallet/verify-payment", {
-        razorpayOrderId: orderData.orderId,
-        razorpayPaymentId: `pay_mock_${Date.now()}`,
-        razorpaySignature: "mock_sig",
+        razorpayOrderId: payment.razorpay_order_id,
+        razorpayPaymentId: payment.razorpay_payment_id,
+        razorpaySignature: payment.razorpay_signature,
       });
       const verified = verifyResponse.data.data || {};
       setBalance(verified.walletBalance ?? balance + amount);
       Alert.alert("Recharge successful", `₹${amount} added to your wallet.`);
       await loadBalance();
     } catch (error) {
-      console.log("Recharge failed:", error);
+      const orderId = error?.metadata?.order_id;
+      if (orderId) {
+        api.post("/wallet/payment-failed", { razorpayOrderId: orderId, reason: "Payment cancelled or failed" }).catch(() => {});
+      }
       Alert.alert("Recharge failed", error.response?.data?.message || "Please try again later.");
     } finally {
       setRechargeLoading(false);

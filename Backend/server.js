@@ -40,6 +40,7 @@ app.get("/ready", (req, res) => {
 });
 
 const { initSocket } = require("./config/socket");
+const { billActiveSessions } = require("./services/consultationService");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/horoscope", horoscopeRoutes);
@@ -53,6 +54,7 @@ app.use("/api/history", require("./routes/history"));
 app.use("/api/wallet", require("./routes/wallet"));
 app.use("/api/astrologer", require("./routes/astrologer"));
 app.use("/api/chat", require("./routes/chat"));
+app.use("/api/consultations", require("./routes/consultation"));
 app.use("/api/admin", require("./routes/admin"));
 
 app.use((req, res, next) => next(new AppError("Route not found.", 404)));
@@ -84,6 +86,8 @@ const startServer = async () => {
   const http = require("http");
   const httpServer = http.createServer(app);
   initSocket(httpServer);
+  const billingTimer = setInterval(() => billActiveSessions(), 30000);
+  billingTimer.unref();
 
   server = httpServer.listen(config.port, () => logger.info("server.started", { port: config.port, environment: config.nodeEnv }));
   process.once("SIGTERM", () => shutdown("SIGTERM"));

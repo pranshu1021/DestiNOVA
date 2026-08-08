@@ -9,6 +9,8 @@ const REQUIRED_ENVIRONMENT_VARIABLES = [
   "GOOGLE_WEB_CLIENT_ID",
   "PROKERALA_CLIENT_ID",
   "PROKERALA_CLIENT_SECRET",
+  "RAZORPAY_KEY_ID",
+  "RAZORPAY_KEY_SECRET",
 ];
 
 const getAllowedOrigins = (nodeEnv, originsValue) => {
@@ -57,6 +59,8 @@ module.exports = Object.freeze({
   googleWebClientId: process.env.GOOGLE_WEB_CLIENT_ID,
   prokeralaClientId: process.env.PROKERALA_CLIENT_ID,
   prokeralaClientSecret: process.env.PROKERALA_CLIENT_SECRET,
+  razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+  razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET,
   geminiApiKey: process.env.GEMINI_API_KEY || "",
   corsOrigins: getAllowedOrigins(nodeEnv, process.env.CORS_ORIGINS),
 });

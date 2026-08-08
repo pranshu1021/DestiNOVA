@@ -2,6 +2,7 @@ const Astrologer = require("../models/Astrologer");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 const AppError = require("../utils/AppError");
+const ConsultationSession = require("../models/ConsultationSession");
 
 const getPendingAstrologers = async (req, res, next) => {
   try {
@@ -66,6 +67,13 @@ const getAllTransactions = async (req, res, next) => {
   }
 };
 
+const getAllSessions = async (req, res, next) => {
+  try {
+    const sessions = await ConsultationSession.find().populate("customerId", "fullName email").populate("astrologerId", "fullName").sort({ createdAt: -1 }).limit(100).lean();
+    return res.json({ success: true, data: sessions });
+  } catch (error) { return next(error); }
+};
+
 const getAdminStats = async (req, res, next) => {
   try {
     const totalUsers = await User.countDocuments();
@@ -98,5 +106,6 @@ module.exports = {
   suspendUser,
   getAllUsers,
   getAllTransactions,
+  getAllSessions,
   getAdminStats,
 };

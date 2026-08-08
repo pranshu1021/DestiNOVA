@@ -1,157 +1,74 @@
+const jwt = require("jsonwebtoken");
 const { Server } = require("socket.io");
 const ChatMessage = require("../models/ChatMessage");
-const Astrologer = require("../models/Astrologer");
-const User = require("../models/User");
-const Wallet = require("../models/Wallet");
-const Transaction = require("../models/Transaction");
+const config = require(".");
+const logger = require("../utils/logger");
+const { assertParticipant, acceptRequest, rejectRequest, endSession } = require("../services/consultationService");
 
-let io = null;
+let io;
+
+const emitError = (socket, message) => socket.emit("session_error", { message });
 
 const initSocket = (server) => {
-  io = new Server(server, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
-    },
+  io = new Server(server, { cors: { origin: config.corsOrigins, methods: ["GET", "POST"] } });
+  io.use((socket, next) => {
+    try {
+      const token = socket.handshake.auth?.token;
+      const payload = jwt.verify(token, config.jwtSecret, { algorithms: ["HS256"] });
+      if (!payload?.id) throw new Error("Invalid token");
+      socket.userId = String(payload.id);
+      return next();
+    } catch (_) { return next(new Error("Authentication required")); }
   });
-
   io.on("connection", (socket) => {
-    console.log("Socket connected:", socket.id);
-
-    socket.on("join_room", ({ sessionId, userId }) => {
-      socket.join(sessionId);
-      if (userId) socket.join(userId);
-      console.log(`User ${userId} joined room ${sessionId}`);
-    });
-
-    socket.on("request_chat", async (payload) => {
+    socket.join(socket.userId);
+    socket.on("join_room", async ({ sessionId }, callback) => {
       try {
-        const { customerId, astrologerId, sessionId, pricePerMinute, customerName, astrologerName } = payload || {};
-        const customer = await User.findById(customerId).lean();
-        const astrologer = await Astrologer.findById(astrologerId).lean();
-        if (!customer || !astrologer) return;
-        if (customerId === astrologer?.userId?.toString()) {
-          io.to(customerId).emit("chat_request_error", { message: "You cannot start a chat with yourself." });
-          return;
-        }
-        if (!astrologer.isOnline) {
-          io.to(customerId).emit("chat_request_error", { message: "Astrologer is currently offline." });
-          return;
-        }
-        const wallet = await Wallet.findOne({ userId: customerId }).lean();
-        if (!wallet || wallet.balance < Number(pricePerMinute || 0)) {
-          io.to(customerId).emit("chat_request_error", { message: "Insufficient wallet balance to start a chat." });
-          return;
-        }
-        io.to(astrologer?.userId?.toString()).emit("incoming_chat_request", {
-          sessionId,
-          customerId,
-          astrologerId,
-          pricePerMinute,
-          customerName,
-          astrologerName,
-          timestamp: new Date().toISOString(),
-        });
-      } catch (error) {
-        console.log("Socket request_chat error:", error.message);
-      }
+        await assertParticipant(sessionId, socket.userId);
+        socket.join(String(sessionId));
+        callback?.({ success: true });
+      } catch (error) { emitError(socket, error.message); callback?.({ success: false, message: error.message }); }
     });
-
-    socket.on("accept_chat_request", async (payload) => {
+    socket.on("send_message", async ({ sessionId, text = "", imageUrl = "", voiceUrl = "" }, callback) => {
       try {
-        const { sessionId, customerId, astrologerId } = payload || {};
-        io.to(customerId).emit("chat_request_accepted", { sessionId, astrologerId });
-        io.to(astrologerId).emit("chat_started", { sessionId, customerId });
-        io.to(sessionId).emit("chat_session_ready", { sessionId, customerId, astrologerId });
-      } catch (error) {
-        console.log("Socket accept_chat_request error:", error.message);
-      }
+        const { session, isCustomer } = await assertParticipant(sessionId, socket.userId);
+        if (session.status !== "ACTIVE") throw new Error("This consultation is not active.");
+        if (!String(text).trim() && !imageUrl && !voiceUrl) throw new Error("Message cannot be empty.");
+        const astrologer = await require("../models/Astrologer").findById(session.astrologerId).select("userId");
+        const receiverId = isCustomer ? astrologer.userId : session.customerId;
+        const message = await ChatMessage.create({ sessionId: String(session._id), senderId: socket.userId, receiverId, text: String(text).trim(), imageUrl, voiceUrl });
+        io.to(String(session._id)).emit("receive_message", message);
+        io.to(String(receiverId)).emit("new_message", { sessionId: String(session._id), message });
+        callback?.({ success: true, message });
+      } catch (error) { emitError(socket, error.message); callback?.({ success: false, message: error.message }); }
     });
-
-    socket.on("reject_chat_request", async (payload) => {
+    socket.on("typing", async ({ sessionId, isTyping }) => {
+      try { await assertParticipant(sessionId, socket.userId); socket.to(String(sessionId)).emit("user_typing", { userId: socket.userId, isTyping: Boolean(isTyping) }); } catch (_) {}
+    });
+    socket.on("message_seen", async ({ sessionId, messageId }) => {
       try {
-        const { sessionId, customerId } = payload || {};
-        io.to(customerId).emit("chat_request_rejected", { sessionId, message: "Astrologer is unavailable right now." });
-      } catch (error) {
-        console.log("Socket reject_chat_request error:", error.message);
-      }
+        await assertParticipant(sessionId, socket.userId);
+        const message = await ChatMessage.findOneAndUpdate({ _id: messageId, sessionId: String(sessionId), receiverId: socket.userId }, { isSeen: true, seenAt: new Date() }, { new: true });
+        if (message) io.to(String(sessionId)).emit("message_seen_update", { messageId: String(message._id), receiverId: socket.userId });
+      } catch (_) {}
     });
-
-    socket.on("end_chat_session", async (payload) => {
-      try {
-        const { sessionId, userId } = payload || {};
-        io.to(sessionId).emit("chat_session_ended", { sessionId, userId });
-      } catch (error) {
-        console.log("Socket end_chat_session error:", error.message);
-      }
+    socket.on("accept_chat_request", async ({ sessionId }, callback) => {
+      try { const session = await acceptRequest(sessionId, socket.userId); io.to(String(session.customerId)).emit("consultation_accepted", { session: session.toObject() }); io.to(String(session._id)).emit("session_started", { session: session.toObject() }); callback?.({ success: true, session }); } catch (error) { emitError(socket, error.message); callback?.({ success: false, message: error.message }); }
     });
-
-    // 1-to-1 Real-time Chat
-    socket.on("send_message", async (data) => {
-      const { sessionId, senderId, receiverId, text, imageUrl, voiceUrl } = data || {};
-      try {
-        const msg = await ChatMessage.create({
-          sessionId,
-          senderId,
-          receiverId,
-          text,
-          imageUrl: imageUrl || "",
-          voiceUrl: voiceUrl || "",
-        });
-
-        io.to(sessionId).emit("receive_message", msg);
-      } catch (err) {
-        console.log("Socket send_message error:", err.message);
-      }
+    socket.on("reject_chat_request", async ({ sessionId }, callback) => {
+      try { const session = await rejectRequest(sessionId, socket.userId); io.to(String(session.customerId)).emit("consultation_rejected", { session: session.toObject() }); callback?.({ success: true }); } catch (error) { emitError(socket, error.message); callback?.({ success: false, message: error.message }); }
     });
-
-    // Typing Indicators & Read Receipts
-    socket.on("typing", ({ sessionId, userId, isTyping }) => {
-      socket.to(sessionId).emit("user_typing", { userId, isTyping });
+    socket.on("end_chat_session", async ({ sessionId }, callback) => {
+      try { const session = await endSession(sessionId, socket.userId); io.to(String(session._id)).emit("session_ended", { session: session.toObject() }); callback?.({ success: true }); } catch (error) { emitError(socket, error.message); callback?.({ success: false, message: error.message }); }
     });
-
-    socket.on("message_seen", async ({ sessionId, messageId, receiverId }) => {
-      try {
-        await ChatMessage.findByIdAndUpdate(messageId, { isSeen: true, seenAt: new Date() });
-        io.to(sessionId).emit("message_seen_update", { messageId, receiverId });
-      } catch (err) {
-        console.log("Socket message_seen error:", err.message);
-      }
-    });
-
-    // WebRTC Audio/Video Call Signaling Architecture
-    socket.on("call_offer", ({ to, offer, from, callType }) => {
-      io.to(to).emit("incoming_call", { offer, from, callType });
-    });
-
-    socket.on("call_answer", ({ to, answer }) => {
-      io.to(to).emit("call_accepted", { answer });
-    });
-
-    socket.on("ice_candidate", ({ to, candidate }) => {
-      io.to(to).emit("ice_candidate", { candidate });
-    });
-
-    socket.on("end_call", ({ to }) => {
-      io.to(to).emit("call_ended");
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Socket disconnected:", socket.id);
-    });
+    // Signaling data stays opaque, but its room and participants are authenticated.
+    ["call_offer", "call_answer", "ice_candidate", "end_call"].forEach((event) => socket.on(event, async ({ sessionId, ...payload }) => {
+      try { await assertParticipant(sessionId, socket.userId); socket.to(String(sessionId)).emit(event === "call_offer" ? "incoming_call" : event === "call_answer" ? "call_accepted" : event === "end_call" ? "call_ended" : "ice_candidate", { ...payload, from: socket.userId, sessionId: String(sessionId) }); } catch (_) {}
+    }));
+    socket.on("disconnect", () => logger.info("socket.disconnected", { socketId: socket.id, userId: socket.userId }));
   });
-
   return io;
 };
 
-const getIO = () => {
-  if (!io) {
-    throw new Error("Socket.io not initialized.");
-  }
-  return io;
-};
-
-module.exports = {
-  initSocket,
-  getIO,
-};
+const getIO = () => { if (!io) throw new Error("Socket.io not initialized."); return io; };
+module.exports = { initSocket, getIO };

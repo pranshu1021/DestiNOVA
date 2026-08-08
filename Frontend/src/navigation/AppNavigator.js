@@ -32,6 +32,7 @@ import AstrologerDetailScreen from "../screens/AstrologerScreen/AstrologerDetail
 import AstrologerListScreen from "../screens/AstrologerScreen/AstrologerListScreen";
 import AstrologerSessionScreen from "../screens/AstrologerScreen/AstrologerSessionScreen";
 import AstrologerSessionsScreen from "../screens/AstrologerScreen/AstrologerSessionsScreen";
+import AstrologerChatRequestsScreen from "../screens/AstrologerScreen/AstrologerChatRequestsScreen";
 import AstrologerAnalyticsScreen from "../screens/AstrologerScreen/AstrologerAnalyticsScreen";
 import AstroSignup from "../screens/AstrologerScreen/AstroSignup";
 const Stack = createNativeStackNavigator();
@@ -63,6 +64,7 @@ export default function AppNavigator() {
                     <>
                             <Stack.Screen name="AstrologerDashboard" component={AstrologerDashboardScreen} />
                         <Stack.Screen name="AstrologerSessions" component={AstrologerSessionsScreen} />
+                        <Stack.Screen name="AstrologerChatRequests" component={AstrologerChatRequestsScreen} />
                         <Stack.Screen name="AstrologerAnalytics" component={AstrologerAnalyticsScreen} />
                         <Stack.Screen name="Profile" component={ProfileScreen} />
                         <Stack.Screen name="AstrologerSession" component={AstrologerSessionScreen} />

@@ -1,0 +1,11 @@
+const router = require("express").Router();
+const protect = require("../middleware/authMiddleware");
+const controller = require("../controllers/consultationController");
+router.use(protect);
+router.get("/mine", controller.listMine);
+router.post("/request", controller.requestSession);
+router.post("/:sessionId/accept", controller.accept);
+router.post("/:sessionId/reject", controller.reject);
+router.post("/:sessionId/end", controller.end);
+router.post("/:sessionId/review", controller.review);
+module.exports = router;

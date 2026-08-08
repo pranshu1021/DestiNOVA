@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemeContext } from "../../context/ThemeContext";
 import { AuthContext } from "../../context/AuthContext";
 import api from "../../services/api";
-import { initSocket, getSocket } from "../../services/socket";
+import { initSocket } from "../../services/socket";
 import CosmicBackground from "../../components/CosmicBackground";
 import CosmicBottomBar from "../../components/CosmicBottomBar";
 
@@ -41,18 +41,22 @@ export default function AstrologerDashboardScreen({ navigation }) {
 
   useEffect(() => {
     loadDashboard();
+    let socket;
+    const handleRequest = ({ session }) => {
+      setPendingRequest(session);
+      Alert.alert("New consultation request", `${session?.customerId?.fullName || "A customer"} wants to start a ${session?.sessionType || "chat"}.`);
+      loadDashboard();
+    };
     const registerSocket = async () => {
       try {
-        const socket = await initSocket();
-        socket.on("incoming_chat_request", ({ sessionId, customerId, pricePerMinute, customerName, astrologerName }) => {
-          setPendingRequest({ sessionId, customerId, pricePerMinute, customerName, astrologerName });
-          Alert.alert("New chat request", `${customerName || "A customer"} wants to start a chat.`);
-        });
+        socket = await initSocket();
+        socket.on("consultation_request", handleRequest);
       } catch (error) {
         console.log("Dashboard socket init error:", error);
       }
     };
     registerSocket();
+    return () => { socket?.off("consultation_request", handleRequest); };
   }, [loadDashboard]);
 
   const toggleOnlineStatus = async () => {
@@ -69,35 +73,20 @@ export default function AstrologerDashboardScreen({ navigation }) {
     }
   };
 
-  const acceptPendingRequest = () => {
-    if (!pendingRequest?.sessionId || !currentUserId) return;
-    const socket = getSocket();
-    if (!socket) return;
-    socket.emit("accept_chat_request", {
-      sessionId: pendingRequest.sessionId,
-      customerId: pendingRequest.customerId,
-      astrologerId: currentUserId,
-    });
-    setPendingRequest(null);
-    navigation.navigate("AstrologerSession", {
-      sessionId: pendingRequest.sessionId,
-      astrologerId: pendingRequest.astrologerId,
-      astrologerName: pendingRequest.astrologerName || "Astrologer",
-      astrologerUserId: pendingRequest.customerId,
-      sessionType: "chat",
-      costPerMinute: pendingRequest.pricePerMinute || 15,
-    });
+  const acceptPendingRequest = async () => {
+    if (!pendingRequest?._id) return;
+    try {
+      const response = await api.post(`/consultations/${pendingRequest._id}/accept`);
+      const session = response.data.data;
+      setPendingRequest(null);
+      navigation.navigate("AstrologerSession", { sessionId: session._id, astrologerName: pendingRequest.customerId?.fullName || "Customer", astrologerUserId: pendingRequest.customerId?._id, sessionType: session.sessionType, costPerMinute: session.pricePerMinute });
+      loadDashboard();
+    } catch (error) { Alert.alert("Unable to accept", error.response?.data?.message || "Please try again."); }
   };
 
-  const rejectPendingRequest = () => {
-    if (!pendingRequest?.sessionId) return;
-    const socket = getSocket();
-    if (!socket) return;
-    socket.emit("reject_chat_request", {
-      sessionId: pendingRequest.sessionId,
-      customerId: pendingRequest.customerId,
-    });
-    setPendingRequest(null);
+  const rejectPendingRequest = async () => {
+    if (!pendingRequest?._id) return;
+    try { await api.post(`/consultations/${pendingRequest._id}/reject`); setPendingRequest(null); loadDashboard(); } catch (error) { Alert.alert("Unable to reject", error.response?.data?.message || "Please try again."); }
   };
 
   if (loading) {
@@ -167,11 +156,29 @@ export default function AstrologerDashboardScreen({ navigation }) {
               <Text style={[styles.metricValue, { color: colors.success }]}>₹{dashboard?.balance ?? 0}</Text>
             </View>
           </View>
+          <View style={[styles.statsRow, { marginTop: spacing.md }]}>
+            <View style={[styles.metricBox, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: borderRadius.xl, ...shadows.soft }]}>
+              <Text style={[styles.metricLabel, { color: colors.textSub }]}>Pending</Text>
+              <Text style={[styles.metricValue, { color: colors.primary }]}>{dashboard?.pendingRequests ?? 0}</Text>
+            </View>
+            <View style={[styles.metricBox, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: borderRadius.xl, ...shadows.soft }]}>
+              <Text style={[styles.metricLabel, { color: colors.textSub }]}>Active</Text>
+              <Text style={[styles.metricValue, { color: colors.success }]}>{dashboard?.activeSessions ?? 0}</Text>
+            </View>
+          </View>
+          <View style={[styles.actionRow, { marginTop: spacing.md }]}>
+            <TouchableOpacity activeOpacity={0.8} style={[styles.actionButton, { backgroundColor: colors.primary, borderRadius: borderRadius.lg }]} onPress={() => navigation.navigate("AstrologerChatRequests")}>
+              <Text style={[styles.actionButtonText, { color: colors.white }]}>Chat Requests</Text>
+            </TouchableOpacity>
+            <TouchableOpacity activeOpacity={0.8} style={[styles.actionButton, { backgroundColor: colors.secondary, borderRadius: borderRadius.lg }]} onPress={() => navigation.navigate("AstrologerSessions")}>
+              <Text style={[styles.actionButtonText, { color: colors.white }]}>Chats</Text>
+            </TouchableOpacity>
+          </View>
 
           {pendingRequest ? (
             <View style={[styles.pendingCard, { backgroundColor: colors.cardSolid, borderColor: colors.primary, borderRadius: borderRadius.xl }]}> 
               <Text style={[styles.sectionTitle, { color: colors.textMain }]}>Incoming Chat Request</Text>
-              <Text style={[styles.sectionText, { color: colors.textSub, marginTop: spacing.sm }]}> {pendingRequest.customerName || "A customer"} wants to start a chat.</Text>
+              <Text style={[styles.sectionText, { color: colors.textSub, marginTop: spacing.sm }]}> {pendingRequest.customerId?.fullName || "A customer"} wants to start a {pendingRequest.sessionType || "chat"}.</Text>
               <Text style={[styles.sectionText, { color: colors.textSub }]}>Rate: ₹{pendingRequest.pricePerMinute || 15}/min</Text>
               <View style={styles.pendingActions}> 
                 <TouchableOpacity activeOpacity={0.8} style={[styles.pendingButton, { backgroundColor: colors.success, borderRadius: borderRadius.md }]} onPress={acceptPendingRequest}> 
@@ -197,16 +204,16 @@ export default function AstrologerDashboardScreen({ navigation }) {
             <TouchableOpacity
               activeOpacity={0.8}
               style={[styles.actionButton, { backgroundColor: colors.primary, borderRadius: borderRadius.lg }]}
-              onPress={() => navigation.navigate("Profile")}
+              onPress={() => navigation.navigate("AstrologerSessions")}
             >
-              <Text style={[styles.actionButtonText, { color: colors.white }]}>Edit Profile</Text>
+              <Text style={[styles.actionButtonText, { color: colors.white }]}>Chat History</Text>
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.8}
               style={[styles.actionButton, { backgroundColor: colors.secondary, borderRadius: borderRadius.lg }]}
               onPress={() => navigation.navigate("AstrologerAnalytics")}
             >
-              <Text style={[styles.actionButtonText, { color: colors.white }]}>View Analytics</Text>
+              <Text style={[styles.actionButtonText, { color: colors.white }]}>Earnings</Text>
             </TouchableOpacity>
           </View>
 
