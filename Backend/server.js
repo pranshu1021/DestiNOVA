@@ -70,7 +70,7 @@ const shutdown = (signal) => {
   logger.info("server.shutdown.started", { signal });
   const forceExit = setTimeout(() => process.exit(1), 10000);
   forceExit.unref();
-
+//hmm
   server.close(async (error) => {
     if (error) logger.error("server.shutdown.http_failed", { message: error.message });
     await mongoose.connection.close(false);
